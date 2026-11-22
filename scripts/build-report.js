@@ -1,5 +1,6 @@
-// Converts REPORT.md (with its screenshots) into REPORT.pdf using headless Chrome/Edge.
-// Usage: npm run report
+// Converts a Markdown file (with its screenshots) into a PDF using headless Chrome/Edge.
+// Usage: npm run report                      -> REPORT.md to REPORT.pdf
+//        node scripts/build-report.js DEMO_GUIDE.md   -> DEMO_GUIDE.pdf
 const fs = require('fs');
 const path = require('path');
 const { pathToFileURL } = require('url');
@@ -7,6 +8,8 @@ const { marked } = require('marked');
 const puppeteer = require('puppeteer-core');
 
 const ROOT = path.join(__dirname, '..');
+const INPUT = process.argv[2] || 'REPORT.md';
+const OUTPUT = INPUT.replace(/\.md$/i, '.pdf');
 const CANDIDATES = [
   process.env.CHROME_PATH,
   'C:/Program Files/Google/Chrome/Application/chrome.exe',
@@ -29,7 +32,7 @@ const css = `
 `;
 
 (async () => {
-  const md = fs.readFileSync(path.join(ROOT, 'REPORT.md'), 'utf8');
+  const md = fs.readFileSync(path.join(ROOT, INPUT), 'utf8');
   const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
     <base href="${pathToFileURL(ROOT + path.sep).href}"><style>${css}</style></head>
     <body>${marked.parse(md)}</body></html>`;
@@ -41,12 +44,12 @@ const css = `
   const page = await browser.newPage();
   await page.goto(pathToFileURL(tmp).href, { waitUntil: 'networkidle0' });
   await page.pdf({
-    path: path.join(ROOT, 'REPORT.pdf'), format: 'A4', printBackground: true,
+    path: path.join(ROOT, OUTPUT), format: 'A4', printBackground: true,
     margin: { top: '18mm', bottom: '18mm', left: '16mm', right: '16mm' },
     displayHeaderFooter: true, headerTemplate: '<span></span>',
-    footerTemplate: '<div style="font-size:8pt;width:100%;text-align:center;color:#888">Haven Goods – Project Report · Page <span class="pageNumber"></span> of <span class="totalPages"></span></div>',
+    footerTemplate: `<div style="font-size:8pt;width:100%;text-align:center;color:#888">Haven Goods – ${INPUT === 'REPORT.md' ? 'Project Report' : 'Demonstration Guide'} · Page <span class="pageNumber"></span> of <span class="totalPages"></span></div>`,
   });
   await browser.close();
   fs.unlinkSync(tmp);
-  console.log('REPORT.pdf created');
+  console.log(`${OUTPUT} created`);
 })().catch((err) => { console.error(err); process.exit(1); });

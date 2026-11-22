@@ -62,7 +62,7 @@ haven-goods/
 ├── screenshots/           26 screenshots of all major pages
 ├── scripts/               reset-db, build check, end-to-end / browser / security tests, report builder
 ├── REPORT.pdf             Project report (source: REPORT.md)
-└── DEMO_GUIDE.md          Step-by-step script for the live demonstration
+└── DEMO_GUIDE.pdf / .md   Step-by-step script for the live demonstration (uses the live website)
 ```
 
 ## Useful commands
