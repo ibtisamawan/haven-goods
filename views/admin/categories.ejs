@@ -2,14 +2,14 @@
 
 <div class="admin-grid">
   <section class="card">
-    <table class="table">
+    <div class="table-wrap"><table class="table">
       <thead><tr><th>Name</th><th>Description</th><th>Products</th><th class="right">Actions</th></tr></thead>
       <tbody>
         <% categories.forEach(c => { %>
           <tr>
             <td><strong><%= c.name %></strong></td>
             <td><%= c.description %></td>
-            <td><a href="/products?category=<%= c.id %>" target="_blank"><%= c.product_count %></a></td>
+            <td><a href="/products?category=<%= c.id %>" target="_blank" rel="noopener"><%= c.product_count %></a></td>
             <td class="right nowrap">
               <a href="/admin/categories?edit=<%= c.id %>" class="btn btn-sm btn-outline">Edit</a>
               <form action="/admin/categories/<%= c.id %>/delete" method="post" class="inline" data-confirm="Delete category &quot;<%= c.name %>&quot;?">
@@ -19,11 +19,11 @@
           </tr>
         <% }) %>
       </tbody>
-    </table>
+    </table></div>
   </section>
 
   <form action="/admin/categories" method="post" class="card">
-    <h3><%= editing ? 'Edit category' : 'Add new category' %></h3>
+    <h2 class="h3"><%= editing ? 'Edit category' : 'Add new category' %></h2>
     <% if (editing) { %><input type="hidden" name="id" value="<%= editing.id %>"><% } %>
     <div class="field">
       <label for="name">Name</label>

@@ -1,10 +1,11 @@
 // Admin dashboard: products, categories, customers, orders and reviews
+const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const multer = require('multer');
 const router = require('express').Router();
 const { all, get, run, transaction, UPLOAD_DIR } = require('../db');
-const { flash, requireAdmin, ORDER_STATUSES, STATUS_NOTES, PRODUCT_SELECT } = require('../lib/helpers');
+const { flash, requireAdmin, clean, ORDER_STATUSES, STATUS_NOTES, PRODUCT_SELECT } = require('../lib/helpers');
 
 router.use(requireAdmin);
 
@@ -80,17 +81,17 @@ function productFromBody(req, existing = {}) {
   const oldPrice = Number(req.body.old_price);
   return {
     id: existing.id,
-    name: (req.body.name || '').trim(),
-    brand: (req.body.brand || '').trim() || null,
-    description: (req.body.description || '').trim(),
+    name: clean(req.body.name, 150),
+    brand: clean(req.body.brand, 100) || null,
+    description: clean(req.body.description, 5000),
     price: Number(req.body.price),
     old_price: oldPrice > 0 ? oldPrice : null,
-    stock: parseInt(req.body.stock, 10),
+    stock: Number(req.body.stock),
     category_id: Number(req.body.category_id),
     featured: req.body.featured ? 1 : 0,
-    warranty: (req.body.warranty || '').trim() || null,
-    specs: (req.body.specs || '').trim() || null,
-    image: main ? `/uploads/${main.filename}` : ((req.body.image_url || '').trim() || existing.image || ''),
+    warranty: clean(req.body.warranty, 100) || null,
+    specs: clean(req.body.specs, 2000) || null,
+    image: main ? `/uploads/${main.filename}` : (clean(req.body.image_url, 255) || existing.image || ''),
   };
 }
 
@@ -98,7 +99,11 @@ function validateProduct(p) {
   const errors = [];
   if (!p.name) errors.push('Product name is required.');
   if (!p.description) errors.push('Description is required.');
-  if (!Number.isFinite(p.price) || p.price < 0) errors.push('Price must be a positive number.');
+  if (!Number.isFinite(p.price) || p.price <= 0) errors.push('Price must be a number greater than 0.');
+  // Image paths must be on this site (or an https URL) - never javascript: or other schemes
+  if (p.image && !/^\/[\w\-./]+$/.test(p.image) && !/^https:\/\/[^\s"'<>]+$/.test(p.image)) {
+    errors.push('Image path must start with "/" (e.g. /images/products/photo.webp) or be an https:// URL.');
+  }
   if (p.old_price !== null && p.old_price <= p.price) errors.push('"Price before discount" must be higher than the price (or left empty).');
   if (!Number.isInteger(p.stock) || p.stock < 0) errors.push('Stock must be 0 or more.');
   if (!get('SELECT id FROM categories WHERE id = ?', p.category_id)) errors.push('Please choose a category.');
@@ -106,11 +111,30 @@ function validateProduct(p) {
   return errors;
 }
 
+// Checks the first bytes of a file: only real JPEG, PNG, GIF or WEBP images are kept
+function isRealImage(file) {
+  const fd = fs.openSync(file, 'r');
+  const h = Buffer.alloc(12);
+  fs.readSync(fd, h, 0, 12, 0);
+  fs.closeSync(fd);
+  return (h[0] === 0xff && h[1] === 0xd8 && h[2] === 0xff)
+    || h.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))
+    || h.toString('ascii', 0, 4) === 'GIF8'
+    || (h.toString('ascii', 0, 4) === 'RIFF' && h.toString('ascii', 8, 12) === 'WEBP');
+}
+
 function withUpload(req, res, next) {
+  const back = req.params.id ? `/admin/products/${req.params.id}/edit` : '/admin/products/new';
   productUpload(req, res, (err) => {
+    const files = Object.values(req.files || {}).flat();
+    if (!err) {
+      const fake = files.find((f) => !isRealImage(f.path));
+      if (fake) err = new Error(`"${fake.originalname}" is not a valid image file.`);
+    }
     if (err) {
-      flash(req, 'error', err.message);
-      return res.redirect(req.originalUrl.endsWith('/products') ? '/admin/products/new' : `/admin/products/${req.params.id}/edit`);
+      for (const f of files) fs.rmSync(f.path, { force: true }); // don't keep rejected uploads
+      flash(req, 'error', err.code === 'LIMIT_FILE_SIZE' ? 'Each image must be 2 MB or smaller.' : err.message);
+      return res.redirect(back);
     }
     next();
   });
@@ -178,8 +202,8 @@ router.get('/categories', (req, res) => {
 });
 
 router.post('/categories', (req, res) => {
-  const name = (req.body.name || '').trim();
-  const description = (req.body.description || '').trim();
+  const name = clean(req.body.name, 100);
+  const description = clean(req.body.description, 500);
   const id = Number(req.body.id) || null;
   if (!name) {
     flash(req, 'error', 'Category name is required.');
@@ -240,7 +264,8 @@ router.get('/orders', (req, res) => {
   const orders = status
     ? all('SELECT * FROM orders WHERE status = ? ORDER BY created_at DESC', status)
     : all('SELECT * FROM orders ORDER BY created_at DESC');
-  const counts = Object.fromEntries(ORDER_STATUSES.map((s) => [s, get('SELECT COUNT(*) AS n FROM orders WHERE status = ?', s).n]));
+  const grouped = Object.fromEntries(all('SELECT status, COUNT(*) AS n FROM orders GROUP BY status').map((r) => [r.status, r.n]));
+  const counts = Object.fromEntries(ORDER_STATUSES.map((s) => [s, grouped[s] || 0]));
   res.render('admin/orders', { title: 'Orders', orders, status, counts });
 });
 
@@ -252,33 +277,55 @@ router.get('/orders/:id', (req, res, next) => {
   res.render('admin/order', { title: `Order #${order.id}`, order, items, history });
 });
 
-router.post('/orders/:id/status', (req, res) => {
-  const order = get('SELECT * FROM orders WHERE id = ?', Number(req.params.id));
-  const status = req.body.status;
-  if (order && ORDER_STATUSES.includes(status) && status !== order.status) {
-    transaction(() => {
-      let paymentStatus = order.payment_status;
-      // Cash on delivery is collected when the order is delivered
-      if (order.payment_method === 'COD' && status === 'Delivered') paymentStatus = 'Paid';
-      if (order.payment_method !== 'COD' && status === 'Cancelled') paymentStatus = 'Refunded (demo)';
-      // Put stock back when an order is cancelled (and take it again if re-opened)
-      const cancelling = status === 'Cancelled';
-      const reopening = order.status === 'Cancelled';
-      if (cancelling || reopening) {
-        const sign = cancelling ? '+' : '-';
-        for (const item of all('SELECT * FROM order_items WHERE order_id = ?', order.id)) {
-          if (item.product_id) {
-            run(`UPDATE products SET stock = MAX(0, stock ${sign} ?) WHERE id = ?`, item.quantity, item.product_id);
-          }
+router.post('/orders/:id/status', (req, res, next) => {
+  const order = get('SELECT * FROM orders WHERE id = ?', Number(req.params.id) || 0);
+  if (!order) return next();
+  const status = String(req.body.status || '');
+  const back = req.body.back === 'list' ? '/admin/orders' : `/admin/orders/${order.id}`;
+  if (!ORDER_STATUSES.includes(status)) {
+    flash(req, 'error', 'Please choose a valid status.');
+    return res.redirect(back);
+  }
+  if (status === order.status) {
+    flash(req, 'info', `Order #${order.id} is already ${status}.`);
+    return res.redirect(back);
+  }
+  const items = all('SELECT * FROM order_items WHERE order_id = ?', order.id);
+  const cancelling = status === 'Cancelled';
+  const reopening = order.status === 'Cancelled';
+  // Re-opening a cancelled order takes the items out of stock again, so they must be available
+  if (reopening) {
+    const short = items.filter((i) => i.product_id)
+      .map((i) => ({ i, p: get('SELECT name, stock FROM products WHERE id = ?', i.product_id) }))
+      .filter(({ i, p }) => p && p.stock < i.quantity);
+    if (short.length) {
+      flash(req, 'error', `Cannot re-open order #${order.id}: not enough stock for ${short.map(({ p }) => `"${p.name}" (${p.stock} left)`).join(', ')}.`);
+      return res.redirect(back);
+    }
+  }
+  transaction(() => {
+    let paymentStatus = order.payment_status;
+    // Cash on delivery is collected when the order is delivered
+    if (order.payment_method === 'COD' && status === 'Delivered') paymentStatus = 'Paid';
+    if (order.payment_method !== 'COD' && cancelling) paymentStatus = 'Refunded (demo)';
+    if (order.payment_method !== 'COD' && reopening) paymentStatus = 'Paid (demo)';
+    // Return items to stock (and the sold counter) on cancel; take them again when re-opened
+    if (cancelling || reopening) {
+      for (const item of items) {
+        if (!item.product_id) continue;
+        if (cancelling) {
+          run('UPDATE products SET stock = stock + ?, sold_count = MAX(0, sold_count - ?) WHERE id = ?', item.quantity, item.quantity, item.product_id);
+        } else {
+          run('UPDATE products SET stock = stock - ?, sold_count = sold_count + ? WHERE id = ?', item.quantity, item.quantity, item.product_id);
         }
       }
-      run('UPDATE orders SET status = ?, payment_status = ? WHERE id = ?', status, paymentStatus, order.id);
-      const note = (req.body.note || '').trim() || STATUS_NOTES[status];
-      run('INSERT INTO order_status_history (order_id, status, note) VALUES (?, ?, ?)', order.id, status, note);
-    });
-    flash(req, 'success', `Order #${order.id} status changed to ${status}.`);
-  }
-  res.redirect(req.body.back === 'list' ? '/admin/orders' : `/admin/orders/${req.params.id}`);
+    }
+    run('UPDATE orders SET status = ?, payment_status = ? WHERE id = ?', status, paymentStatus, order.id);
+    const note = clean(req.body.note, 255) || STATUS_NOTES[status];
+    run('INSERT INTO order_status_history (order_id, status, note) VALUES (?, ?, ?)', order.id, status, note);
+  });
+  flash(req, 'success', `Order #${order.id} status changed to ${status}.`);
+  res.redirect(back);
 });
 
 // ---------------------------------------------------------------- Reviews

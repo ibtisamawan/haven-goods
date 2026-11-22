@@ -1,14 +1,17 @@
 <%- include('partials/header') %>
 
+<h1 class="page-title">My Account</h1>
+
 <div class="account-layout">
-  <aside class="card account-nav">
+  <aside class="card account-nav" aria-label="Account menu">
     <p class="muted">Hello,</p>
-    <h3><%= customer.name %></h3>
+    <p class="account-name"><%= customer.name %></p>
     <nav>
-      <a href="#orders" class="active">📦 My Orders</a>
-      <a href="/wishlist">♥ My Wishlist (<%= wishCount %>)</a>
-      <a href="#profile">👤 My Profile</a>
-      <a href="/help">❓ Help Center</a>
+      <a href="#orders" aria-current="page"><span aria-hidden="true">📦</span> My Orders</a>
+      <a href="/wishlist"><span aria-hidden="true">♥</span> My Wishlist (<%= wishCount %>)</a>
+      <a href="#profile"><span aria-hidden="true">👤</span> My Profile</a>
+      <a href="#password"><span aria-hidden="true">🔒</span> Change Password</a>
+      <a href="/help"><span aria-hidden="true">❓</span> Help Center</a>
     </nav>
     <form action="/logout" method="post"><button class="btn btn-ghost btn-block">Logout</button></form>
   </aside>
@@ -21,8 +24,8 @@
       <div class="card"><small class="muted">Wishlist</small><b><%= wishCount %></b></div>
     </div>
 
-    <section class="card" id="orders">
-      <h3>My Orders</h3>
+    <section class="card" id="orders" aria-labelledby="orders-title">
+      <h2 class="h3" id="orders-title">My Orders</h2>
       <% if (!orders.length) { %>
         <p class="muted">You haven't placed any orders yet. <a href="/products">Start shopping</a>.</p>
       <% } %>
@@ -30,11 +33,11 @@
         <div class="order-card">
           <div class="order-card-head">
             <span>Order <b>#<%= o.id %></b> <span class="muted">· Placed on <%= String(o.created_at).slice(0, 10) %></span></span>
-            <a href="/account/orders/<%= o.id %>">Manage / Track ›</a>
+            <a href="/account/orders/<%= o.id %>" aria-label="Manage or track order #<%= o.id %>">Manage / Track ›</a>
           </div>
           <div class="order-card-body">
             <div class="order-thumbs">
-              <% o.items.slice(0, 4).forEach(i => { %><img src="<%= i.image || '/images/logo.svg' %>" alt="<%= i.product_name %>" title="<%= i.product_name %>"><% }) %>
+              <% o.items.slice(0, 4).forEach(i => { %><img src="<%= i.image || '/images/logo.svg' %>" alt="<%= i.product_name %>" title="<%= i.product_name %>" width="48" height="48"><% }) %>
               <span class="muted"><%= o.items.length === 1 ? o.items[0].product_name : `${o.items.length} items` %></span>
             </div>
             <span class="badge status-<%= o.status.toLowerCase() %>"><%= o.status %></span>
@@ -45,17 +48,28 @@
       <% }) %>
     </section>
 
-    <form action="/account" method="post" class="card" id="profile">
-      <h3>My Profile</h3>
+    <form action="/account" method="post" class="card" id="profile" aria-labelledby="profile-title">
+      <h2 class="h3" id="profile-title">My Profile</h2>
       <div class="form-grid">
-        <div class="field"><label for="name">Full name</label><input id="name" name="name" value="<%= customer.name %>" required></div>
-        <div class="field"><label>Email</label><input value="<%= customer.email %>" disabled></div>
-        <div class="field"><label for="phone">Phone</label><input id="phone" name="phone" value="<%= customer.phone || '' %>"></div>
-        <div class="field"><label for="city">City</label><input id="city" name="city" value="<%= customer.city || '' %>"></div>
-        <div class="field span-2"><label for="address">Address</label><input id="address" name="address" value="<%= customer.address || '' %>"></div>
+        <div class="field"><label for="name">Full name</label><input id="name" name="name" value="<%= customer.name %>" maxlength="100" autocomplete="name" required></div>
+        <div class="field"><label for="account-email">Email</label><input id="account-email" value="<%= customer.email %>" disabled></div>
+        <div class="field"><label for="phone">Phone</label><input id="phone" name="phone" type="tel" value="<%= customer.phone || '' %>" maxlength="30" autocomplete="tel"></div>
+        <div class="field"><label for="city">City</label><input id="city" name="city" value="<%= customer.city || '' %>" maxlength="100" autocomplete="address-level2"></div>
+        <div class="field span-2"><label for="address">Address</label><input id="address" name="address" value="<%= customer.address || '' %>" maxlength="255" autocomplete="street-address"></div>
       </div>
       <button class="btn">Save changes</button>
       <span class="hint">Member since <%= String(customer.created_at).slice(0, 10) %></span>
+    </form>
+
+    <form action="/account/password" method="post" class="card" id="password" aria-labelledby="password-title">
+      <h2 class="h3" id="password-title">Change Password</h2>
+      <div class="form-grid">
+        <div class="field span-2"><label for="current_password">Current password</label><input id="current_password" name="current_password" type="password" autocomplete="current-password" required></div>
+        <div class="field"><label for="new_password">New password</label><input id="new_password" name="new_password" type="password" minlength="8" maxlength="128" autocomplete="new-password" aria-describedby="pw-hint" required></div>
+        <div class="field"><label for="confirm_password">Confirm new password</label><input id="confirm_password" name="confirm_password" type="password" minlength="8" maxlength="128" autocomplete="new-password" required></div>
+      </div>
+      <p class="hint" id="pw-hint">At least 8 characters.</p>
+      <button class="btn">Change password</button>
     </form>
   </div>
 </div>

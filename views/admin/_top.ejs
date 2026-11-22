@@ -4,32 +4,36 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><%= title %> | <%= store.name %> Admin</title>
+  <meta name="description" content="<%= store.name %> admin panel: manage products, categories, customers, orders and reviews.">
+  <meta name="robots" content="noindex, nofollow">
   <link rel="icon" href="/images/logo.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/style.css?v=<%= assetVersion %>">
+  <script src="/js/main.js?v=<%= assetVersion %>" defer></script>
 </head>
 <body class="admin">
+<a href="#main" class="skip-link">Skip to main content</a>
 <div class="admin-shell">
   <aside class="admin-side"><div class="admin-side-inner">
     <a href="/admin" class="brand brand-admin">
       <img src="/images/logo.svg" alt="" width="36" height="36">
       <span><strong><%= store.name %></strong><small>Admin panel</small></span>
     </a>
-    <nav>
-      <a href="/admin" class="<%= path === '/admin' || path === '/admin/' ? 'active' : '' %>">Dashboard</a>
-      <a href="/admin/products" class="<%= path.startsWith('/admin/products') ? 'active' : '' %>">Products</a>
-      <a href="/admin/categories" class="<%= path.startsWith('/admin/categories') ? 'active' : '' %>">Categories</a>
-      <a href="/admin/customers" class="<%= path.startsWith('/admin/customers') ? 'active' : '' %>">Customers</a>
-      <a href="/admin/orders" class="<%= path.startsWith('/admin/orders') ? 'active' : '' %>">Orders</a>
-      <a href="/admin/reviews" class="<%= path.startsWith('/admin/reviews') ? 'active' : '' %>">Reviews</a>
+    <nav aria-label="Admin">
+      <a href="/admin" class="<%= path === '/admin' || path === '/admin/' ? 'active' : '' %>"<%- path === '/admin' || path === '/admin/' ? ' aria-current="page"' : '' %>>Dashboard</a>
+      <a href="/admin/products" class="<%= path.startsWith('/admin/products') ? 'active' : '' %>"<%- path.startsWith('/admin/products') ? ' aria-current="page"' : '' %>>Products</a>
+      <a href="/admin/categories" class="<%= path.startsWith('/admin/categories') ? 'active' : '' %>"<%- path.startsWith('/admin/categories') ? ' aria-current="page"' : '' %>>Categories</a>
+      <a href="/admin/customers" class="<%= path.startsWith('/admin/customers') ? 'active' : '' %>"<%- path.startsWith('/admin/customers') ? ' aria-current="page"' : '' %>>Customers</a>
+      <a href="/admin/orders" class="<%= path.startsWith('/admin/orders') ? 'active' : '' %>"<%- path.startsWith('/admin/orders') ? ' aria-current="page"' : '' %>>Orders</a>
+      <a href="/admin/reviews" class="<%= path.startsWith('/admin/reviews') ? 'active' : '' %>"<%- path.startsWith('/admin/reviews') ? ' aria-current="page"' : '' %>>Reviews</a>
     </nav>
     <div class="admin-side-foot">
-      <a href="/" target="_blank">View store ↗</a>
+      <a href="/" target="_blank" rel="noopener">View store ↗<span class="sr-only"> (opens in a new tab)</span></a>
       <form action="/logout" method="post"><button class="link-btn">Logout</button></form>
     </div>
   </div></aside>
-  <div class="admin-main">
+  <main class="admin-main" id="main" tabindex="-1">
     <header class="admin-top">
       <h1><%= title %></h1>
       <span class="muted">Signed in as <strong><%= user.name %></strong></span>
     </header>
-    <% if (flash) { %><div class="alert alert-<%= flash.type %>"><%= flash.text %></div><% } %>
+    <% if (flash) { %><div class="alert alert-<%= flash.type %>" role="<%= flash.type === 'error' ? 'alert' : 'status' %>"><%= flash.text %></div><% } %>

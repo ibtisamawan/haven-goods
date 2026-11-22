@@ -1,61 +1,63 @@
 <%- include('partials/header') %>
 
 <div class="breadcrumb"><a href="/cart">Cart</a> › Checkout</div>
+<h1 class="page-title">Checkout</h1>
 
 <% if (errors.length) { %>
-  <div class="alert alert-error"><ul><% errors.forEach(e => { %><li><%= e %></li><% }) %></ul></div>
+  <div class="alert alert-error" role="alert"><ul><% errors.forEach(e => { %><li><%= e %></li><% }) %></ul></div>
 <% } %>
 
 <form action="/checkout" method="post" class="checkout-layout" id="checkout-form">
+  <input type="hidden" name="checkout_token" value="<%= checkoutToken %>">
   <div>
     <section class="card">
-      <h3><span class="step">1</span> Shipping address</h3>
+      <h2 class="h3"><span class="step" aria-hidden="true">1</span> Shipping address</h2>
       <div class="form-grid">
         <div class="field">
           <label for="name">Full name</label>
-          <input id="name" name="name" value="<%= form.name %>" required>
+          <input id="name" name="name" value="<%= form.name %>" maxlength="100" autocomplete="name" required>
         </div>
         <div class="field">
           <label for="phone">Phone number</label>
-          <input id="phone" name="phone" value="<%= form.phone || '' %>" placeholder="03XX-XXXXXXX" required>
+          <input id="phone" name="phone" type="tel" value="<%= form.phone || '' %>" placeholder="03XX-XXXXXXX" maxlength="30" autocomplete="tel" required>
         </div>
         <div class="field">
           <label for="email">Email</label>
-          <input id="email" type="email" name="email" value="<%= form.email %>" required>
+          <input id="email" type="email" name="email" value="<%= form.email %>" maxlength="150" autocomplete="email" required>
         </div>
         <div class="field">
           <label for="city">City</label>
-          <input id="city" name="city" value="<%= form.city || '' %>" list="cities" required>
+          <input id="city" name="city" value="<%= form.city || '' %>" list="cities" maxlength="100" autocomplete="address-level2" required>
           <datalist id="cities"><option>Lahore</option><option>Karachi</option><option>Islamabad</option><option>Rawalpindi</option><option>Faisalabad</option><option>Multan</option><option>Peshawar</option><option>Quetta</option></datalist>
         </div>
         <div class="field span-2">
           <label for="address">Address</label>
-          <input id="address" name="address" value="<%= form.address || '' %>" placeholder="House no., street, area" required>
+          <input id="address" name="address" value="<%= form.address || '' %>" placeholder="House no., street, area" maxlength="255" autocomplete="street-address" required>
         </div>
         <div class="field span-2">
           <label for="notes">Delivery instructions <span class="muted">(optional)</span></label>
-          <textarea id="notes" name="notes" rows="2" placeholder="e.g. Please call before delivery"><%= form.notes || '' %></textarea>
+          <textarea id="notes" name="notes" rows="2" maxlength="500" placeholder="e.g. Please call before delivery"><%= form.notes || '' %></textarea>
         </div>
       </div>
     </section>
 
     <section class="card">
-      <h3><span class="step">2</span> Select payment method</h3>
+      <h2 class="h3"><span class="step" aria-hidden="true">2</span> Select payment method</h2>
       <div class="pay-options">
         <label class="pay-option">
           <input type="radio" name="payment_method" value="COD" <%= form.payment_method === 'COD' || !form.payment_method ? 'checked' : '' %>>
-          <span class="pay-ico">💵</span>
+          <span class="pay-ico" aria-hidden="true">💵</span>
           <span><strong>Cash on Delivery</strong><small>Pay in cash when your order arrives at your door.</small></span>
         </label>
         <label class="pay-option">
           <input type="radio" name="payment_method" value="CARD" <%= form.payment_method === 'CARD' ? 'checked' : '' %>>
-          <span class="pay-ico">💳</span>
+          <span class="pay-ico" aria-hidden="true">💳</span>
           <span><strong>Credit / Debit Card <em class="demo-tag">Demo</em></strong><small>Example of an online payment. No real payment is processed.</small></span>
           <span class="card-logos" aria-hidden="true"><b>VISA</b><b>Mastercard</b></span>
         </label>
         <label class="pay-option">
           <input type="radio" name="payment_method" value="WALLET" <%= form.payment_method === 'WALLET' ? 'checked' : '' %>>
-          <span class="pay-ico">📱</span>
+          <span class="pay-ico" aria-hidden="true">📱</span>
           <span><strong>Mobile Wallet <em class="demo-tag">Demo</em></strong><small>Example of paying from a mobile wallet account. No real payment is processed.</small></span>
         </label>
       </div>
@@ -76,8 +78,8 @@
     </section>
   </div>
 
-  <aside class="card summary">
-    <h3><span class="step">3</span> Order summary</h3>
+  <aside class="card summary" aria-label="Order summary">
+    <h2 class="h3"><span class="step" aria-hidden="true">3</span> Order summary</h2>
     <ul class="summary-items">
       <% cart.items.forEach(i => { %>
         <li>

@@ -159,6 +159,9 @@ async function addToCart(page, id, qty = 1) {
   await submit(customer, '.review-form button');
   await expectText(customer, 'Your review has been posted');
   await expectText(customer, 'Bought this for my brother');
+  // Bilal ordered this phone above, so his review must carry the badge
+  const verified = await customer.$$eval('.review', (els) => els.some((e) => e.textContent.includes('Bought this for my brother') && e.textContent.includes('Verified Purchase')));
+  if (!verified) throw new Error('Review by a buyer should be marked "Verified Purchase"');
   await shot(customer, 'product-ratings-and-reviews', { full: false, scrollTo: '#reviews' });
 
   // Second order paid with the demo wallet, then cancelled by the customer

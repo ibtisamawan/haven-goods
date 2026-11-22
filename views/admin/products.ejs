@@ -10,12 +10,12 @@
 </div>
 
 <section class="card">
-  <table class="table">
-    <thead><tr><th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Sold</th><th>Rating</th><th>Featured</th><th class="right">Actions</th></tr></thead>
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th><span class="sr-only">Image</span></th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Sold</th><th>Rating</th><th>Featured</th><th class="right">Actions</th></tr></thead>
     <tbody>
       <% products.forEach(p => { const off = discount(p); %>
         <tr>
-          <td><img class="thumb" src="<%= p.image %>" alt=""></td>
+          <td><img class="thumb" src="<%= p.image %>" alt="" width="52" height="52" loading="lazy"></td>
           <td><strong><%= p.name %></strong><br><small class="muted">#<%= p.id %><%= p.brand ? ' · ' + p.brand : '' %></small></td>
           <td><%= p.category_name %></td>
           <td class="price-cell"><%= money(p.price) %><% if (off) { %><s><%= money(p.old_price) %> (-<%= off %>%)</s><% } %></td>
@@ -24,16 +24,16 @@
           <td><%= p.review_count ? `★ ${p.rating} (${p.review_count})` : '—' %></td>
           <td><%= p.featured ? 'Yes' : '—' %></td>
           <td class="right nowrap">
-            <a href="/products/<%= p.id %>" class="btn btn-sm btn-ghost" target="_blank">View</a>
-            <a href="/admin/products/<%= p.id %>/edit" class="btn btn-sm btn-outline">Edit</a>
+            <a href="/products/<%= p.id %>" class="btn btn-sm btn-ghost" target="_blank" rel="noopener" aria-label="View <%= p.name %> in store">View</a>
+            <a href="/admin/products/<%= p.id %>/edit" class="btn btn-sm btn-outline" aria-label="Edit <%= p.name %>">Edit</a>
             <form action="/admin/products/<%= p.id %>/delete" method="post" class="inline" data-confirm="Delete product &quot;<%= p.name %>&quot;?">
-              <button class="btn btn-sm btn-danger">Delete</button>
+              <button class="btn btn-sm btn-danger" aria-label="Delete <%= p.name %>">Delete</button>
             </form>
           </td>
         </tr>
       <% }) %>
     </tbody>
-  </table>
+  </table></div>
 </section>
 
 <%- include('_bottom') %>

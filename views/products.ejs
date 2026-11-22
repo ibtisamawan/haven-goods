@@ -7,7 +7,9 @@
 </div>
 
 <div class="shop-layout">
-  <aside class="filters">
+  <aside class="filters-wrap" aria-label="Product filters">
+  <details class="filters" id="filters" open>
+    <summary class="filters-summary">Filters<% const active = selectedBrands.length + (min || max ? 1 : 0) + (rating ? 1 : 0); if (active) { %> <span class="chip-count"><%= active %></span><% } %></summary>
     <form method="get" action="/products" id="filter-form">
       <% if (activeCategory) { %><input type="hidden" name="category" value="<%= activeCategory.id %>"><% } %>
       <% if (q) { %><input type="hidden" name="q" value="<%= q %>"><% } %>
@@ -50,8 +52,9 @@
     <div class="filter-group">
       <h4>Rating</h4>
       <% [5, 4, 3].forEach(r => { %>
-        <a href="<%= link({ rating: String(rating) === String(r) ? null : r, page: null }) %>" class="rating-link <%= String(rating) === String(r) ? 'active' : '' %>">
-          <span class="stars" style="--r: <%= r %>"></span> <%= r < 5 ? '& up' : '' %>
+        <a href="<%= link({ rating: String(rating) === String(r) ? null : r, page: null }) %>" class="rating-link <%= String(rating) === String(r) ? 'active' : '' %>"<%- String(rating) === String(r) ? ' aria-current="true"' : '' %>>
+          <span class="stars" style="--r: <%= r %>" aria-hidden="true"></span> <span aria-hidden="true"><%= r < 5 ? '& up' : '' %></span>
+          <span class="sr-only"><%= r %> stars<%= r < 5 ? ' and up' : '' %></span>
         </a>
       <% }) %>
     </div>
@@ -59,12 +62,13 @@
     <% if (selectedBrands.length || min || max || rating) { %>
       <a href="<%= link({ brand: null, min: null, max: null, rating: null, page: null }) %>" class="btn btn-ghost btn-block">Clear filters</a>
     <% } %>
+  </details>
   </aside>
 
   <section class="results">
     <div class="results-head">
       <div>
-        <h1><%= activeCategory ? activeCategory.name : (q ? `"${q}"` : 'All Products') %></h1>
+        <h1><%= activeCategory ? activeCategory.name : (q ? `Results for "${q}"` : 'All Products') %></h1>
         <p class="muted"><%= total %> item<%= total === 1 ? '' : 's' %> found<%= q && activeCategory ? ` for "${q}"` : '' %></p>
       </div>
       <form method="get" action="/products" class="sort-form">
@@ -87,7 +91,7 @@
     <% if (selectedBrands.length) { %>
       <div class="chips">
         <% selectedBrands.forEach(b => { %>
-          <a class="chip" href="<%= link({ brand: selectedBrands.filter(x => x !== b), page: null }) %>"><%= b %> ✕</a>
+          <a class="chip" href="<%= link({ brand: selectedBrands.filter(x => x !== b), page: null }) %>" aria-label="Remove filter <%= b %>"><%= b %> ✕</a>
         <% }) %>
       </div>
     <% } %>
@@ -98,9 +102,9 @@
       </div>
       <% if (pages > 1) { %>
         <nav class="pagination" aria-label="Pages">
-          <% if (page > 1) { %><a href="<%= link({ page: page - 1 }) %>">‹ Prev</a><% } %>
+          <% if (page > 1) { %><a href="<%= link({ page: page - 1 > 1 ? page - 1 : null }) %>" rel="prev">‹ Prev</a><% } %>
           <% for (let i = 1; i <= pages; i++) { %>
-            <a href="<%= link({ page: i }) %>" class="<%= i === page ? 'active' : '' %>"><%= i %></a>
+            <a href="<%= link({ page: i > 1 ? i : null }) %>" class="<%= i === page ? 'active' : '' %>"<%- i === page ? ' aria-current="page"' : '' %>><%= i %></a>
           <% } %>
           <% if (page < pages) { %><a href="<%= link({ page: page + 1 }) %>">Next ›</a><% } %>
         </nav>

@@ -7,12 +7,12 @@
 
 <div class="pdp">
   <div class="gallery">
-    <div class="gallery-main"><img src="<%= images[0] %>" alt="<%= product.name %>" id="main-image"></div>
+    <div class="gallery-main"><img src="<%= images[0] %>" alt="<%= product.name %>" id="main-image" width="400" height="400" fetchpriority="high"></div>
     <% if (images.length > 1) { %>
       <div class="thumbs">
         <% images.forEach((img, i) => { %>
-          <button type="button" class="thumb-btn<%= i === 0 ? ' active' : '' %>" data-image="<%= img %>" aria-label="Show image <%= i + 1 %>">
-            <img src="<%= img %>" alt="">
+          <button type="button" class="thumb-btn<%= i === 0 ? ' active' : '' %>" data-image="<%= img %>" aria-label="Show photo <%= i + 1 %> of <%= images.length %>" aria-pressed="<%= i === 0 %>">
+            <img src="<%= img %>" alt="" width="56" height="56">
           </button>
         <% }) %>
       </div>
@@ -23,15 +23,15 @@
     <h1><%= product.name %></h1>
     <div class="pdp-rating">
       <% if (product.review_count) { %>
-        <span class="stars" style="--r: <%= product.rating %>"></span>
-        <a href="#reviews"><%= product.rating %> · <%= product.review_count %> Ratings</a>
+        <span class="stars" style="--r: <%= product.rating %>" aria-hidden="true"></span>
+        <a href="#reviews">Rated <%= product.rating %> out of 5 · <%= product.review_count %> rating<%= product.review_count === 1 ? '' : 's' %></a>
       <% } else { %>
         <a href="#reviews" class="muted">No ratings yet</a>
       <% } %>
       <span class="sep">|</span>
       <span class="muted"><%= compact(product.sold_count) %> sold</span>
       <form action="/wishlist/<%= product.id %>" method="post" class="inline wish-inline">
-        <button class="wish-btn<%= inWishlist ? ' on' : '' %>" title="<%= inWishlist ? 'Remove from' : 'Add to' %> wishlist">♥ <%= inWishlist ? 'Saved' : 'Save' %></button>
+        <button class="wish-btn<%= inWishlist ? ' on' : '' %>" aria-pressed="<%= inWishlist %>" title="<%= inWishlist ? 'Remove from' : 'Add to' %> wishlist"><span aria-hidden="true">♥</span> <%= inWishlist ? 'Saved' : 'Save' %><span class="sr-only"> to wishlist</span></button>
       </form>
     </div>
     <% if (product.brand) { %>
@@ -68,26 +68,26 @@
     <% } %>
   </div>
 
-  <aside class="pdp-side">
+  <aside class="pdp-side" aria-label="Delivery, returns and seller">
     <div class="side-block">
-      <h4>Delivery</h4>
-      <div class="side-row"><span class="ico">📍</span><span><%= city || 'Lahore' %>, Pakistan<small class="muted"><%= city ? 'Your saved city' : 'Log in to use your address' %></small></span></div>
-      <div class="side-row"><span class="ico">🚚</span><span>Standard Delivery<small class="muted">3–5 working days</small></span>
+      <h2 class="side-title">Delivery</h2>
+      <div class="side-row"><span class="ico" aria-hidden="true">📍</span><span><%= city || 'Lahore' %>, Pakistan<small class="muted"><%= city ? 'Your saved city' : 'Log in to use your address' %></small></span></div>
+      <div class="side-row"><span class="ico" aria-hidden="true">🚚</span><span>Standard Delivery<small class="muted">3–5 working days</small></span>
         <b><%= product.price >= store.freeShippingOver ? 'Free' : money(store.shippingFee) %></b></div>
-      <div class="side-row"><span class="ico">💵</span><span>Cash on Delivery available</span></div>
+      <div class="side-row"><span class="ico" aria-hidden="true">💵</span><span>Cash on Delivery available</span></div>
     </div>
     <div class="side-block">
-      <h4>Return &amp; Warranty</h4>
-      <div class="side-row"><span class="ico">↩️</span><span>7 days easy return</span></div>
-      <div class="side-row"><span class="ico">🛡️</span><span><%= product.warranty || 'No warranty' %></span></div>
+      <h2 class="side-title">Return &amp; Warranty</h2>
+      <div class="side-row"><span class="ico" aria-hidden="true">↩️</span><span>7 days easy return</span></div>
+      <div class="side-row"><span class="ico" aria-hidden="true">🛡️</span><span><%= product.warranty || 'No warranty' %></span></div>
     </div>
     <div class="side-block seller">
-      <h4>Sold by</h4>
+      <h2 class="side-title">Sold by</h2>
       <div class="seller-name"><img src="/images/logo.svg" alt="" width="28" height="28"> <b><%= store.name %> Official Store</b></div>
       <div class="seller-stats">
-        <div><small>Positive ratings</small><b>96%</b></div>
-        <div><small>Ship on time</small><b>98%</b></div>
-        <div><small>Chat response</small><b>92%</b></div>
+        <div><small>Positive ratings</small><b><%= sellerStats.positive != null ? sellerStats.positive + '%' : '—' %></b></div>
+        <div><small>Orders delivered</small><b><%= sellerStats.delivered %></b></div>
+        <div><small>Products</small><b><%= sellerStats.products %></b></div>
       </div>
     </div>
   </aside>
@@ -105,11 +105,16 @@
       </ul>
     </div>
     <table class="spec-table">
-      <tr><th><%= isBook ? 'Author' : 'Brand' %></th><td><%= product.brand || 'Generic' %></td></tr>
-      <tr><th>Category</th><td><%= product.category_name %></td></tr>
-      <tr><th>SKU</th><td>HG-<%= String(product.id).padStart(5, '0') %></td></tr>
-      <% String(product.specs || '').split('\n').filter(Boolean).forEach(line => { const i = line.indexOf(':'); %>
-        <tr><th><%= line.slice(0, i) %></th><td><%= line.slice(i + 1).trim() %></td></tr>
+      <caption class="sr-only">Specifications</caption>
+      <tr><th scope="row"><%= isBook ? 'Author' : 'Brand' %></th><td><%= product.brand || 'Generic' %></td></tr>
+      <tr><th scope="row">Category</th><td><%= product.category_name %></td></tr>
+      <tr><th scope="row">SKU</th><td>HG-<%= String(product.id).padStart(5, '0') %></td></tr>
+      <% String(product.specs || '').split(/\r?\n/).map(l => l.trim()).filter(Boolean).forEach(line => { const i = line.indexOf(':'); %>
+        <% if (i > 0) { %>
+          <tr><th scope="row"><%= line.slice(0, i) %></th><td><%= line.slice(i + 1).trim() %></td></tr>
+        <% } else { %>
+          <tr><td colspan="2"><%= line %></td></tr>
+        <% } %>
       <% }) %>
     </table>
   </div>
@@ -120,29 +125,31 @@
   <div class="reviews-top">
     <div class="score">
       <b><%= product.rating || '0.0' %></b><span>/5</span>
-      <div><span class="stars stars-lg" style="--r: <%= product.rating || 0 %>"></span></div>
-      <small class="muted"><%= product.review_count %> Ratings</small>
+      <div><span class="stars stars-lg" style="--r: <%= product.rating || 0 %>" role="img" aria-label="Average rating <%= product.rating || 0 %> out of 5"></span></div>
+      <small class="muted"><%= product.review_count %> rating<%= product.review_count === 1 ? '' : 's' %></small>
     </div>
     <div class="bars">
       <% breakdown.forEach(b => { %>
         <div class="bar-row">
-          <span class="stars" style="--r: <%= b.star %>"></span>
-          <div class="bar"><i style="width: <%= product.review_count ? (b.count / product.review_count * 100) : 0 %>%"></i></div>
-          <span class="muted"><%= b.count %></span>
+          <span class="stars" style="--r: <%= b.star %>" role="img" aria-label="<%= b.star %> star<%= b.star === 1 ? '' : 's' %>"></span>
+          <div class="bar" aria-hidden="true"><i style="width: <%= product.review_count ? (b.count / product.review_count * 100) : 0 %>%"></i></div>
+          <span class="muted"><%= b.count %><span class="sr-only"> reviews</span></span>
         </div>
       <% }) %>
     </div>
     <div class="review-form-wrap">
       <% if (user) { %>
         <form action="/products/<%= product.id %>/reviews" method="post" class="review-form">
-          <h4><%= myReview ? 'Update your review' : 'Write a review' %></h4>
-          <div class="star-input" role="radiogroup" aria-label="Your rating">
+          <h3><%= myReview ? 'Update your review' : 'Write a review' %></h3>
+          <fieldset class="star-input">
+            <legend class="sr-only">Your rating</legend>
             <% [5, 4, 3, 2, 1].forEach(s => { %>
-              <input type="radio" id="star<%= s %>" name="rating" value="<%= s %>" <%= myReview && myReview.rating === s ? 'checked' : '' %>>
-              <label for="star<%= s %>" title="<%= s %> stars">★</label>
+              <input type="radio" id="star<%= s %>" name="rating" value="<%= s %>" required <%= myReview && myReview.rating === s ? 'checked' : '' %>>
+              <label for="star<%= s %>" title="<%= s %> star<%= s === 1 ? '' : 's' %>"><span aria-hidden="true">★</span><span class="sr-only"><%= s %> star<%= s === 1 ? '' : 's' %></span></label>
             <% }) %>
-          </div>
-          <textarea name="comment" rows="3" placeholder="What did you like or dislike?"><%= myReview ? myReview.comment : '' %></textarea>
+          </fieldset>
+          <label for="review-comment" class="sr-only">Your review</label>
+          <textarea id="review-comment" name="comment" rows="3" maxlength="1000" placeholder="What did you like or dislike?"><%= myReview ? myReview.comment : '' %></textarea>
           <button class="btn btn-sm">Submit review</button>
         </form>
       <% } else { %>
@@ -151,16 +158,16 @@
     </div>
   </div>
 
-  <h4 class="reviews-title">Product Reviews</h4>
+  <h3 class="reviews-title">Product Reviews</h3>
   <% if (!reviews.length) { %><p class="muted">This product has no reviews yet. Be the first to review it!</p><% } %>
   <div class="review-list">
     <% reviews.forEach(r => { %>
       <div class="review">
         <div class="review-head">
-          <span class="stars" style="--r: <%= r.rating %>"></span>
+          <span class="stars" style="--r: <%= r.rating %>" role="img" aria-label="Rated <%= r.rating %> out of 5"></span>
           <span class="muted"><%= String(r.created_at).slice(0, 10) %></span>
         </div>
-        <div class="review-by">by <b><%= r.reviewer_name %></b> <span class="verified">✓ Verified Purchase</span></div>
+        <div class="review-by">by <b><%= r.reviewer_name %></b> <% if (r.verified) { %><span class="verified">✓ Verified Purchase</span><% } %></div>
         <% if (r.comment) { %><p><%= r.comment %></p><% } %>
       </div>
     <% }) %>

@@ -5,14 +5,14 @@
 <div class="admin-grid">
   <div class="stack">
     <section class="card">
-      <h3>Items</h3>
-      <table class="table">
-        <thead><tr><th></th><th>Product</th><th>Price</th><th>Qty</th><th class="right">Total</th></tr></thead>
+      <h2 class="h3">Items</h2>
+      <div class="table-wrap"><table class="table">
+        <thead><tr><th><span class="sr-only">Image</span></th><th>Product</th><th>Price</th><th>Qty</th><th class="right">Total</th></tr></thead>
         <tbody>
           <% items.forEach(i => { %>
             <tr>
               <td><img class="thumb" src="<%= i.image || '/images/logo.svg' %>" alt=""></td>
-              <td><% if (i.product_id) { %><a href="/products/<%= i.product_id %>" target="_blank"><%= i.product_name %></a><% } else { %><%= i.product_name %> <small class="muted">(deleted)</small><% } %></td>
+              <td><% if (i.product_id) { %><a href="/products/<%= i.product_id %>" target="_blank" rel="noopener"><%= i.product_name %></a><% } else { %><%= i.product_name %> <small class="muted">(deleted)</small><% } %></td>
               <td><%= money(i.price) %></td><td><%= i.quantity %></td><td class="right"><%= money(i.price * i.quantity) %></td>
             </tr>
           <% }) %>
@@ -22,10 +22,10 @@
           <tr><td colspan="4">Shipping</td><td class="right"><%= order.shipping ? money(order.shipping) : 'Free' %></td></tr>
           <tr class="sum-total"><td colspan="4">Total</td><td class="right"><%= money(order.total) %></td></tr>
         </tfoot>
-      </table>
+      </table></div>
     </section>
     <section class="card">
-      <h3>Customer &amp; delivery</h3>
+      <h2 class="h3">Customer &amp; delivery</h2>
       <dl class="details">
         <dt>Name</dt><dd><a href="/admin/customers/<%= order.user_id %>"><%= order.customer_name %></a></dd>
         <dt>Email</dt><dd><%= order.email %></dd>
@@ -35,7 +35,7 @@
       </dl>
     </section>
     <section class="card">
-      <h3>Tracking history</h3>
+      <h2 class="h3">Tracking history</h2>
       <ul class="history">
         <% history.forEach(h => { %>
           <li><span class="muted"><%= h.created_at %></span><b><%= h.status %></b><span><%= h.note %></span></li>
@@ -45,7 +45,7 @@
   </div>
 
   <aside class="card">
-    <h3>Order status</h3>
+    <h2 class="h3">Order status</h2>
     <p><span class="badge badge-lg status-<%= order.status.toLowerCase() %>"><%= order.status %></span></p>
     <dl class="details">
       <dt>Placed</dt><dd><%= order.created_at %></dd>

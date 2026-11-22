@@ -4,14 +4,14 @@
   <form action="/login" method="post" class="card auth-card">
     <h1>Log in</h1>
     <p class="muted">Welcome back! Log in to check out and track your orders.</p>
-    <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+    <% if (error) { %><div class="alert alert-error" role="alert"><%= error %></div><% } %>
     <div class="field">
       <label for="email">Email</label>
-      <input id="email" type="email" name="email" value="<%= email %>" required autofocus>
+      <input id="email" type="email" name="email" value="<%= email %>" maxlength="150" autocomplete="email" required autofocus>
     </div>
     <div class="field">
       <label for="password">Password</label>
-      <input id="password" type="password" name="password" required>
+      <input id="password" type="password" name="password" maxlength="128" autocomplete="current-password" required>
     </div>
     <button class="btn btn-lg btn-block">Log in</button>
     <p class="center">New customer? <a href="/register">Create an account</a></p>

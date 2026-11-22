@@ -4,8 +4,8 @@
 
 <div class="admin-grid">
   <section class="card">
-    <h3>Orders</h3>
-    <table class="table">
+    <h2 class="h3">Orders</h2>
+    <div class="table-wrap"><table class="table">
       <thead><tr><th>Order</th><th>Date</th><th>Total</th><th>Payment</th><th>Status</th></tr></thead>
       <tbody>
         <% orders.forEach(o => { %>
@@ -13,16 +13,16 @@
             <td><a href="/admin/orders/<%= o.id %>">#<%= o.id %></a></td>
             <td><%= String(o.created_at).slice(0, 16) %></td>
             <td><%= money(o.total) %></td>
-            <td><%= o.payment_method %> &middot; <%= o.payment_status %></td>
+            <td><%= paymentLabels[o.payment_method] %> &middot; <%= o.payment_status %></td>
             <td><span class="badge status-<%= o.status.toLowerCase() %>"><%= o.status %></span></td>
           </tr>
         <% }) %>
         <% if (!orders.length) { %><tr><td colspan="5" class="muted">No orders yet.</td></tr><% } %>
       </tbody>
-    </table>
+    </table></div>
   </section>
   <aside class="card">
-    <h3>Customer details</h3>
+    <h2 class="h3">Customer details</h2>
     <dl class="details">
       <dt>Name</dt><dd><%= customer.name %></dd>
       <dt>Email</dt><dd><%= customer.email %></dd>

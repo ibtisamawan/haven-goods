@@ -10,8 +10,8 @@
 <div class="admin-grid">
   <div class="stack">
     <section class="card">
-      <div class="card-head"><h3>Recent orders</h3><a href="/admin/orders">View all</a></div>
-      <table class="table">
+      <div class="card-head"><h2 class="h3">Recent orders</h2><a href="/admin/orders">View all</a></div>
+      <div class="table-wrap"><table class="table">
         <thead><tr><th>Order</th><th>Customer</th><th>Date</th><th>Payment</th><th>Total</th><th>Status</th></tr></thead>
         <tbody>
           <% recentOrders.forEach(o => { %>
@@ -26,10 +26,10 @@
           <% }) %>
           <% if (!recentOrders.length) { %><tr><td colspan="6" class="muted">No orders yet.</td></tr><% } %>
         </tbody>
-      </table>
+      </table></div>
     </section>
     <section class="card">
-      <h3>Best-selling products</h3>
+      <h2 class="h3">Best-selling products</h2>
       <ul class="status-list">
         <% topSelling.forEach(t => { %>
           <li><img src="<%= t.image || '/images/logo.svg' %>" alt=""><span class="grow"><%= t.product_name %></span><span class="muted"><%= t.qty %> sold</span><strong><%= money(t.revenue) %></strong></li>
@@ -41,7 +41,7 @@
 
   <div class="stack">
     <section class="card">
-      <h3>Orders by status</h3>
+      <h2 class="h3">Orders by status</h2>
       <ul class="status-list">
         <% byStatus.forEach(s => { %>
           <li><a href="/admin/orders?status=<%= s.status %>"><span class="badge status-<%= s.status.toLowerCase() %>"><%= s.status %></span></a><strong><%= s.count %></strong></li>
@@ -49,7 +49,7 @@
       </ul>
     </section>
     <section class="card">
-      <h3>Low stock (10 or less)</h3>
+      <h2 class="h3">Low stock (10 or less)</h2>
       <% if (!lowStock.length) { %><p class="muted">All products are well stocked.</p><% } %>
       <ul class="status-list">
         <% lowStock.forEach(p => { %>
@@ -58,7 +58,7 @@
       </ul>
     </section>
     <section class="card">
-      <h3>Quick actions</h3>
+      <h2 class="h3">Quick actions</h2>
       <a href="/admin/products/new" class="btn btn-block">+ Add new product</a>
       <a href="/admin/categories" class="btn btn-outline btn-block">Manage categories</a>
       <a href="/admin/orders?status=Pending" class="btn btn-outline btn-block">Process pending orders</a>

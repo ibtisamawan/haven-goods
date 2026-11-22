@@ -1,7 +1,7 @@
 <%- include('_top') %>
 
 <section class="card">
-  <table class="table">
+  <div class="table-wrap"><table class="table">
     <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>City</th><th>Joined</th><th>Orders</th><th>Spent</th><th class="right">Actions</th></tr></thead>
     <tbody>
       <% customers.forEach(c => { %>
@@ -23,7 +23,7 @@
       <% }) %>
       <% if (!customers.length) { %><tr><td colspan="8" class="muted">No customers have registered yet.</td></tr><% } %>
     </tbody>
-  </table>
+  </table></div>
 </section>
 
 <%- include('_bottom') %>

@@ -196,13 +196,19 @@ After deployment, the live site was checked: all pages return 200 OK, images and
 
 ## 8. Security Measures
 
-- Passwords hashed with scrypt and a random salt.
-- Login sessions are kept in a signed, HTTP-only cookie (Secure over https).
-- All database queries use parameters (protection against SQL injection).
+- Passwords hashed with scrypt and a random salt; minimum 8 characters; customers can change their password.
+- Login sessions are kept in a signed, HTTP-only, SameSite cookie (Secure over https). The account's role is re-checked in the database on every request.
+- Cross-site request forgery (CSRF) protection: form posts that come from other websites are rejected.
+- Brute-force protection: after 10 wrong passwords, logins from that address are paused for 15 minutes.
+- Security headers: Content-Security-Policy, clickjacking protection (X-Frame-Options), nosniff, Referrer-Policy and HSTS.
+- All database queries use parameters (protection against SQL injection); search text is matched literally.
 - EJS escapes all output (protection against HTML/script injection).
-- Admin pages are protected by a role check.
-- Uploads accept only image files up to 2 MB.
-- Demo card and wallet details are never submitted or stored.
+- Admin pages are protected by a role check; customers can only see and cancel their own orders.
+- Uploads must be real JPG/PNG/WEBP/GIF images (checked by file contents, not just the name) up to 2 MB.
+- Each checkout has a one-time token, so a double click cannot place the same order twice.
+- Error pages never show internal details; demo card and wallet details are never submitted or stored.
+
+These protections are verified by an automated security test (`npm run test:security`, 35 checks), and a full audit is documented in `WEBSITE_AUDIT_REPORT.md`.
 
 ## 9. Limitations and Future Work
 

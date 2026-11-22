@@ -5,7 +5,7 @@ A full online store for a local business, built like a real marketplace: 62 real
 **Live website:** <https://haven-goods.vercel.app> (hosted on Vercel – see [DEPLOY_GUIDE.md](DEPLOY_GUIDE.md))
 **Source code:** <https://github.com/ibtisamawan/haven-goods> (every push to `main` deploys automatically)
 
-**Tech stack:** Node.js (22.13+ or 24), Express, EJS templates, SQLite (built into Node – no separate database server), HTML, CSS, JavaScript. Deployed on Vercel.
+**Tech stack:** Node.js (22.13+ or 24; Vercel uses 24), Express, EJS templates, SQLite (built into Node – no separate database server), HTML, CSS, JavaScript. Deployed on Vercel.
 
 ## How to run on your computer
 
@@ -53,13 +53,14 @@ haven-goods/
 ├── vercel.json            Vercel settings
 ├── DEPLOY_GUIDE.md        How the site was deployed on Vercel, step by step
 ├── db.js                  SQLite connection; builds the database from database.sql
-├── lib/helpers.js         Store settings, password hashing, login checks
+├── lib/helpers.js         Store settings, password hashing, login checks, input limits
+├── lib/security.js        Security headers, CSRF protection, rate limiter
 ├── routes/                shop.js, cart.js, checkout.js, auth.js, admin.js
 ├── views/                 EJS page templates (admin pages in views/admin)
 ├── public/                CSS, JavaScript, logo, product photos, uploads
 ├── database/database.sql  Database file (SQL): 9 tables + sample data
 ├── screenshots/           26 screenshots of all major pages
-├── scripts/               reset-db, end-to-end test + screenshots, report builder
+├── scripts/               reset-db, build check, end-to-end / browser / security tests, report builder
 ├── REPORT.pdf             Project report (source: REPORT.md)
 └── DEMO_GUIDE.md          Step-by-step script for the live demonstration
 ```
@@ -70,13 +71,19 @@ haven-goods/
 |---|---|
 | `npm start` | Run the website at http://localhost:3000 |
 | `npm run reset-db` | Restore the original sample data (stop the server first) |
-| `npm run screenshots` | Automated end-to-end test of the whole site; saves fresh screenshots (needs Chrome or Edge, fresh database) |
+| `npm run build` | Lint (ESLint) + build check: templates compile, file references resolve, `database.sql` loads. Vercel runs the check on every deploy |
+| `npm test` | End-to-end test of the whole site in a real browser; also saves fresh screenshots (needs Chrome or Edge, server running on a fresh database) |
+| `npm run audit:browser` | Opens every page at 7 screen widths (320–1440px) and reports console errors, broken images, sideways scrolling and accessibility basics. Read-only, safe on the live site: `BASE_URL=https://haven-goods.vercel.app` |
+| `npm run test:security` | 35 automated security tests (CSRF, XSS, SQL injection, access control, brute force, uploads, duplicate orders). Run last on a fresh database; it locks logins for 15 min (restart the server to clear) |
 | `npm run report` | Rebuild `REPORT.pdf` from `REPORT.md` |
+
+See [WEBSITE_AUDIT_REPORT.md](WEBSITE_AUDIT_REPORT.md) for the full production-readiness audit.
 
 ## Notes
 
 - Passwords are stored hashed (scrypt + random salt), never as plain text.
-- Logins and the cart are kept in a signed, HTTP-only cookie (`cookie-session`).
+- Logins and the cart are kept in a signed, HTTP-only cookie (`cookie-session`). `SESSION_SECRET` must be set in production (it is set on Vercel).
+- Security: CSRF protection, login rate limiting, security headers (CSP etc.), upload content checks and one-time checkout tokens – see `lib/security.js`.
 - On the live Vercel site the database restarts from `database.sql` from time to time, so new orders/accounts there are temporary demo data.
 - The card and mobile-wallet payments are **demonstrations only**: those fields have no `name` attribute, so nothing typed into them is sent to the server or saved.
 - Image credits: product photos from the free [DummyJSON](https://dummyjson.com) product catalogue; book covers from [Open Library](https://openlibrary.org). Prices are converted to Pakistani Rupees.

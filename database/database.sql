@@ -107,6 +107,7 @@ CREATE TABLE orders (
     shipping       DECIMAL(10,2) NOT NULL DEFAULT 0,
     total          DECIMAL(10,2) NOT NULL,
     notes          TEXT,
+    checkout_token VARCHAR(64) UNIQUE,     -- one-time token: stops the same checkout creating two orders
     created_at     DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
@@ -139,6 +140,10 @@ CREATE INDEX idx_reviews_product     ON reviews(product_id);
 CREATE INDEX idx_orders_user         ON orders(user_id);
 CREATE INDEX idx_order_items_order   ON order_items(order_id);
 CREATE INDEX idx_status_history      ON order_status_history(order_id);
+CREATE INDEX idx_orders_status       ON orders(status);
+CREATE INDEX idx_wishlist_product    ON wishlist(product_id);
+CREATE INDEX idx_reviews_user        ON reviews(user_id);
+CREATE INDEX idx_products_featured   ON products(featured, sold_count);
 
 -- =====================================================================
 --  Sample data

@@ -7,19 +7,23 @@
   { p: banners.book,   tone: 'slide-amber',  kicker: 'Book Fair',        title: 'Bestselling books, delivered',           text: 'Self-help, finance, fiction and programming books.' },
 ].filter(s => s.p); %>
 
-<section class="home-hero">
-  <aside class="hero-cats">
-    <% categories.forEach(c => { %>
-      <a href="/products?category=<%= c.id %>"><img src="<%= c.image %>" alt=""><span><%= c.name %></span><i>›</i></a>
-    <% }) %>
-  </aside>
+<h1 class="sr-only"><%= store.name %> – online shopping for electronics, fashion, books and more</h1>
 
-  <div class="carousel" id="carousel">
+<section class="home-hero" aria-label="Featured offers">
+  <nav class="hero-cats" aria-label="Shop by category">
+    <% categories.forEach(c => { %>
+      <a href="/products?category=<%= c.id %>"><img src="<%= c.image %>" alt="" width="26" height="26"><span><%= c.name %></span><i aria-hidden="true">›</i></a>
+    <% }) %>
+  </nav>
+
+  <div class="carousel" id="carousel" role="region" aria-roledescription="carousel" aria-label="Offers">
     <% slides.forEach((s, i) => { %>
-      <a class="slide <%= s.tone %><%= i === 0 ? ' active' : '' %>" href="/products/<%= s.p.id %>">
+      <a class="slide <%= s.tone %><%= i === 0 ? ' active' : '' %>" href="/products/<%= s.p.id %>"
+         role="group" aria-roledescription="slide" aria-label="<%= i + 1 %> of <%= slides.length %>: <%= s.title %>"
+         <%- i === 0 ? '' : 'aria-hidden="true" tabindex="-1"' %>>
         <div class="slide-text">
           <span class="slide-kicker"><%= s.kicker %></span>
-          <h2><%= s.title %></h2>
+          <p class="slide-title"><%= s.title %></p>
           <p><%= s.text %></p>
           <span class="slide-price">
             <%= s.p.name %> &middot; <b><%= money(s.p.price) %></b>
@@ -27,12 +31,12 @@
           </span>
           <span class="slide-cta">Shop now</span>
         </div>
-        <img src="<%= s.p.image %>" alt="<%= s.p.name %>">
+        <img src="<%= s.p.image %>" alt="<%= s.p.name %>" width="270" height="270" <%- i === 0 ? 'fetchpriority="high"' : 'loading="lazy"' %>>
       </a>
     <% }) %>
     <button class="car-btn prev" type="button" aria-label="Previous slide">‹</button>
     <button class="car-btn next" type="button" aria-label="Next slide">›</button>
-    <div class="car-dots"><% slides.forEach((s, i) => { %><button type="button" class="<%= i === 0 ? 'active' : '' %>" aria-label="Slide <%= i + 1 %>"></button><% }) %></div>
+    <div class="car-dots"><% slides.forEach((s, i) => { %><button type="button" class="<%= i === 0 ? 'active' : '' %>" aria-label="Show slide <%= i + 1 %>"<%- i === 0 ? ' aria-current="true"' : '' %>></button><% }) %></div>
   </div>
 
   <aside class="hero-side">
@@ -58,13 +62,14 @@
 <section class="block">
   <div class="block-head">
     <h2>Flash Sale</h2>
-    <div class="countdown" id="countdown" aria-label="Sale ends in">
+    <div class="countdown" id="countdown">
       <span>Ending in</span><b data-h>00</b>:<b data-m>00</b>:<b data-s>00</b>
+      <span class="sr-only">(today's deals end at midnight)</span>
     </div>
     <a href="/products?sort=popular" class="btn btn-outline btn-sm head-link">Shop all products</a>
   </div>
   <div class="grid grid-6">
-    <% flashSale.forEach(p => { %><%- include('partials/product-card', { p }) %><% }) %>
+    <% flashSale.forEach(p => { %><%- include('partials/product-card', { p, eagerImage: true }) %><% }) %>
   </div>
 </section>
 <% } %>
@@ -74,7 +79,7 @@
   <div class="cat-grid">
     <% categories.forEach(c => { %>
       <a class="cat-tile" href="/products?category=<%= c.id %>">
-        <img src="<%= c.image %>" alt="" loading="lazy">
+        <img src="<%= c.image %>" alt="" width="80" height="80" loading="lazy">
         <span><%= c.name %></span>
         <small><%= c.product_count %> items</small>
       </a>
@@ -94,7 +99,7 @@
   <div class="brand-grid">
     <% brands.forEach(b => { %>
       <a class="brand-tile" href="/products?brand=<%= encodeURIComponent(b.brand) %>">
-        <img src="<%= b.image %>" alt="" loading="lazy">
+        <img src="<%= b.image %>" alt="" width="64" height="64" loading="lazy">
         <span><%= b.brand %></span>
         <small><%= b.n %> product<%= b.n === 1 ? '' : 's' %></small>
       </a>
@@ -107,7 +112,7 @@
   <div class="grid grid-6">
     <% forYou.forEach(p => { %><%- include('partials/product-card', { p }) %><% }) %>
   </div>
-  <div class="center load-more"><a href="/products" class="btn btn-outline btn-lg">Load more products</a></div>
+  <div class="center load-more"><a href="/products" class="btn btn-outline btn-lg">View all products</a></div>
 </section>
 
 <%- include('partials/footer') %>

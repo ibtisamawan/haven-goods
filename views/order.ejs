@@ -13,6 +13,7 @@
   </div>
 <% } else { %>
   <div class="breadcrumb"><a href="/account">My Account</a> › Order #<%= order.id %></div>
+  <h1 class="page-title">Order #<%= order.id %></h1>
 <% } %>
 
 <div class="order-layout">
@@ -20,7 +21,7 @@
     <section class="card">
       <div class="order-head">
         <div>
-          <h2>Order #<%= order.id %></h2>
+          <h2 class="h3">Order #<%= order.id %></h2>
           <span class="muted">Placed on <%= order.created_at %></span>
         </div>
         <span class="badge badge-lg status-<%= order.status.toLowerCase() %>"><%= order.status %></span>
@@ -29,17 +30,17 @@
       <% if (order.status === 'Cancelled') { %>
         <div class="alert alert-error">This order was cancelled.<% if (order.payment_method !== 'COD') { %> Payment status: <%= order.payment_status %>.<% } %></div>
       <% } else { %>
-        <ol class="tracker">
+        <ol class="tracker" aria-label="Delivery progress">
           <% flow.forEach((s, i) => { %>
             <li class="<%= i <= reached ? 'done' : '' %><%= i === reached ? ' current' : '' %>">
-              <span class="dot"><%= i <= reached ? '✓' : i + 1 %></span>
-              <span><%= labels[s] %></span>
+              <span class="dot" aria-hidden="true"><%= i <= reached ? '✓' : i + 1 %></span>
+              <span><%= labels[s] %><span class="sr-only"><%= i < reached ? ' (done)' : i === reached ? ' (current step)' : '' %></span></span>
             </li>
           <% }) %>
         </ol>
       <% } %>
 
-      <h4>Tracking history</h4>
+      <h3 class="h4">Tracking history</h3>
       <ul class="history">
         <% history.slice().reverse().forEach(h => { %>
           <li><span class="muted"><%= h.created_at %></span><b><%= h.status %></b><span><%= h.note %></span></li>
@@ -48,10 +49,10 @@
     </section>
 
     <section class="card">
-      <h3>Items in this order</h3>
+      <h2 class="h3">Items in this order</h2>
       <% items.forEach(i => { %>
         <div class="order-item">
-          <img src="<%= i.image || '/images/logo.svg' %>" alt="">
+          <img src="<%= i.image || '/images/logo.svg' %>" alt="" width="64" height="64">
           <div>
             <% if (i.product_id) { %><a href="/products/<%= i.product_id %>"><%= i.product_name %></a><% } else { %><%= i.product_name %><% } %>
             <small class="muted">Qty: <%= i.quantity %> × <%= money(i.price) %></small>
@@ -65,7 +66,7 @@
 
   <aside>
     <section class="card">
-      <h3>Order summary</h3>
+      <h2 class="h3">Order summary</h2>
       <div class="sum-row"><span>Subtotal</span><span><%= money(order.subtotal) %></span></div>
       <div class="sum-row"><span>Delivery fee</span><span><%= order.shipping ? money(order.shipping) : 'Free' %></span></div>
       <div class="sum-row sum-total"><span>Total</span><span class="total-price"><%= money(order.total) %></span></div>
@@ -73,7 +74,7 @@
       <div class="sum-row"><span>Payment status</span><span><%= order.payment_status %></span></div>
     </section>
     <section class="card">
-      <h3>Delivery address</h3>
+      <h2 class="h3">Delivery address</h2>
       <p class="addr"><b><%= order.customer_name %></b><br><%= order.address %>, <%= order.city %><br><%= order.phone %><br><%= order.email %></p>
       <% if (order.notes) { %><p class="hint">Note: <%= order.notes %></p><% } %>
     </section>

@@ -1,9 +1,15 @@
 <%- include('partials/header') %>
 
+<h1 class="page-title">Shopping Cart<% if (cart.count) { %> <span class="muted">(<%= cart.count %>)</span><% } %></h1>
+
+<% if (cart.problems) { %>
+  <div class="alert alert-error" role="alert">Some items are no longer available in the quantity you chose. Please lower the quantity or remove them before checking out.</div>
+<% } %>
+
 <% if (!cart.items.length) { %>
   <div class="empty empty-cart">
-    <div class="empty-ico">🛒</div>
-    <h3>There are no items in this cart</h3>
+    <div class="empty-ico" aria-hidden="true">🛒</div>
+    <h2>There are no items in this cart</h2>
     <p class="muted">Browse thousands of products and add your favourites.</p>
     <a class="btn btn-lg" href="/products">Continue shopping</a>
   </div>
@@ -26,12 +32,14 @@
         </div>
         <% cart.items.forEach(i => { const off = discount(i.product); %>
           <div class="cart-item">
-            <a href="/products/<%= i.product.id %>" class="cart-img"><img src="<%= i.product.image %>" alt=""></a>
+            <a href="/products/<%= i.product.id %>" class="cart-img" tabindex="-1" aria-hidden="true"><img src="<%= i.product.image %>" alt="" width="86" height="86"></a>
             <div class="cart-info">
               <a href="/products/<%= i.product.id %>" class="cart-name"><%= i.product.name %></a>
-              <small class="muted"><%= i.product.brand || i.product.category_name %><% if (i.product.stock <= 10) { %> · <span class="low-stock">Only <%= i.product.stock %> left</span><% } %></small>
+              <small class="muted"><%= i.product.brand || i.product.category_name %>
+                <% if (i.stockProblem) { %> · <span class="low-stock"><%= i.product.stock ? `Only ${i.product.stock} available` : 'Out of stock' %></span>
+                <% } else if (i.product.stock <= 10) { %> · <span class="low-stock">Only <%= i.product.stock %> left</span><% } %></small>
               <div class="cart-actions-inline">
-                <button class="link-danger" formaction="/cart/remove/<%= i.product.id %>" title="Remove <%= i.product.name %>">🗑 Remove</button>
+                <button class="link-danger" formaction="/cart/remove/<%= i.product.id %>" aria-label="Remove <%= i.product.name %> from cart"><span aria-hidden="true">🗑</span> Remove</button>
               </div>
             </div>
             <div class="cart-price">
@@ -39,9 +47,9 @@
               <% if (off) { %><small><s><%= money(i.product.old_price) %></s> -<%= off %>%</small><% } %>
             </div>
             <div class="stepper">
-              <button type="button" data-step="-1" aria-label="Decrease">−</button>
-              <input type="number" name="qty_<%= i.product.id %>" value="<%= i.quantity %>" min="0" max="<%= i.product.stock %>" aria-label="Quantity for <%= i.product.name %>">
-              <button type="button" data-step="1" aria-label="Increase">+</button>
+              <button type="button" data-step="-1" aria-label="Decrease quantity of <%= i.product.name %>">−</button>
+              <input type="number" name="qty_<%= i.product.id %>" value="<%= i.quantity %>" min="0" max="<%= Math.max(i.product.stock, i.quantity) %>" aria-label="Quantity for <%= i.product.name %>">
+              <button type="button" data-step="1" aria-label="Increase quantity of <%= i.product.name %>">+</button>
             </div>
             <div class="cart-line"><%= money(i.lineTotal) %></div>
           </div>
@@ -56,13 +64,17 @@
       </div>
     </form>
 
-    <aside class="card summary">
-      <h3>Order Summary</h3>
+    <aside class="card summary" aria-label="Order summary">
+      <h2 class="h3">Order Summary</h2>
       <div class="sum-row"><span>Subtotal (<%= cart.count %> items)</span><span><%= money(cart.subtotal) %></span></div>
       <div class="sum-row"><span>Shipping fee</span><span><%= cart.shipping ? money(cart.shipping) : 'Free' %></span></div>
       <% if (cart.savings) { %><div class="sum-row save"><span>You save</span><span>− <%= money(cart.savings) %></span></div><% } %>
       <div class="sum-row sum-total"><span>Total</span><span class="total-price"><%= money(cart.total) %></span></div>
-      <a href="/checkout" class="btn btn-lg btn-block btn-buy">Proceed to Checkout (<%= cart.count %>)</a>
+      <% if (cart.problems) { %>
+        <button class="btn btn-lg btn-block btn-buy" disabled>Fix the items above to check out</button>
+      <% } else { %>
+        <a href="/checkout" class="btn btn-lg btn-block btn-buy">Proceed to Checkout (<%= cart.count %>)</a>
+      <% } %>
       <% if (!user) { %><p class="hint center">You'll log in or create an account before placing the order.</p><% } %>
     </aside>
   </div>
