@@ -1,0 +1,47 @@
+<%- include('partials/header') %>
+
+<div class="help-hero">
+  <h1>Hi, how can we help you?</h1>
+  <p>Answers to the most common questions about ordering, payment, delivery and returns.</p>
+</div>
+
+<div class="help-grid">
+  <section class="card" id="how-to-buy">
+    <h3>🛍️ How to buy</h3>
+    <ol>
+      <li>Find a product using the search bar or browse the categories.</li>
+      <li>Choose the quantity and click <b>Add to Cart</b> or <b>Buy Now</b>.</li>
+      <li>Open your cart and click <b>Proceed to Checkout</b>.</li>
+      <li>Log in or create an account, then confirm your delivery address.</li>
+      <li>Select a payment method and click <b>Place Order</b>.</li>
+    </ol>
+  </section>
+  <section class="card">
+    <h3>💳 Payment methods</h3>
+    <p><b>Cash on Delivery</b> – pay the rider in cash when your parcel arrives.</p>
+    <p><b>Card</b> and <b>Mobile Wallet</b> – online payment options (shown as a demonstration on this website; no real payment is taken).</p>
+  </section>
+  <section class="card">
+    <h3>🚚 Delivery</h3>
+    <p>Orders are delivered in 3–5 working days across Pakistan. Delivery costs <%= money(store.shippingFee) %> and is <b>free</b> on orders over <%= money(store.freeShippingOver) %>.</p>
+    <p>Track your order any time from <a href="/account">My Account › My Orders</a>.</p>
+  </section>
+  <section class="card" id="returns">
+    <h3>↩️ Returns &amp; refunds</h3>
+    <p>You can return most items within <b>7 days</b> of delivery if they are unused and in the original packaging. Refunds are made to your original payment method.</p>
+    <p>You can cancel an order yourself while it is still <b>Pending</b>.</p>
+  </section>
+  <section class="card">
+    <h3>📞 Contact us</h3>
+    <p>Phone: <%= store.phone %> (Mon–Sat, 10 am – 9 pm)</p>
+    <p>Email: <%= store.email %></p>
+    <p>Shop: <%= store.address %></p>
+  </section>
+  <section class="card">
+    <h3>👤 Your account</h3>
+    <p>With an account you can check out faster, track orders, save a wishlist and review products.</p>
+    <a href="/register" class="btn btn-sm">Create an account</a>
+  </section>
+</div>
+
+<%- include('partials/footer') %>

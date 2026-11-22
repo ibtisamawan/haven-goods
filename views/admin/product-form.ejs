@@ -1,0 +1,85 @@
+<%- include('_top') %>
+
+<% if (errors.length) { %>
+  <div class="alert alert-error"><ul><% errors.forEach(e => { %><li><%= e %></li><% }) %></ul></div>
+<% } %>
+
+<form action="/admin/products<%= product.id ? '/' + product.id : '' %>" method="post" enctype="multipart/form-data" class="card form-card">
+  <div class="form-grid">
+    <div class="field span-2">
+      <label for="name">Product name</label>
+      <input id="name" name="name" value="<%= product.name || '' %>" required>
+    </div>
+    <div class="field">
+      <label for="category_id">Category</label>
+      <select id="category_id" name="category_id" required>
+        <option value="">Choose a category</option>
+        <% categories.forEach(c => { %>
+          <option value="<%= c.id %>" <%= Number(product.category_id) === c.id ? 'selected' : '' %>><%= c.name %></option>
+        <% }) %>
+      </select>
+    </div>
+    <div class="field">
+      <label for="brand">Brand / Author</label>
+      <input id="brand" name="brand" value="<%= product.brand || '' %>" placeholder="e.g. Samsung">
+    </div>
+    <div class="field">
+      <label for="price">Selling price (<%= store.currency %>)</label>
+      <input id="price" type="number" name="price" min="0" step="1" value="<%= product.price ?? '' %>" required>
+    </div>
+    <div class="field">
+      <label for="old_price">Price before discount <span class="muted">(optional)</span></label>
+      <input id="old_price" type="number" name="old_price" min="0" step="1" value="<%= product.old_price ?? '' %>" placeholder="Leave empty if no discount">
+    </div>
+    <div class="field">
+      <label for="stock">Stock quantity</label>
+      <input id="stock" type="number" name="stock" min="0" step="1" value="<%= product.stock ?? 0 %>" required>
+    </div>
+    <div class="field">
+      <label for="warranty">Warranty</label>
+      <input id="warranty" name="warranty" value="<%= product.warranty || '' %>" placeholder="e.g. 1 year warranty">
+    </div>
+    <div class="field span-2 checkbox-field">
+      <label><input type="checkbox" name="featured" value="1" <%= product.featured ? 'checked' : '' %>> Show in "Top Picks" on the home page</label>
+    </div>
+    <div class="field span-2">
+      <label for="description">Description</label>
+      <textarea id="description" name="description" rows="4" required><%= product.description || '' %></textarea>
+    </div>
+    <div class="field span-2">
+      <label for="specs">Specifications <span class="muted">(one per line, e.g. "Weight: 200 g")</span></label>
+      <textarea id="specs" name="specs" rows="3"><%= product.specs || '' %></textarea>
+    </div>
+    <div class="field">
+      <label for="image">Main image <span class="muted">(JPG/PNG/WEBP, max 2 MB)</span></label>
+      <input id="image" type="file" name="image" accept="image/*">
+    </div>
+    <div class="field">
+      <label for="image_url">…or main image path / URL</label>
+      <input id="image_url" name="image_url" value="<%= product.image || '' %>" placeholder="/images/products/example.webp">
+    </div>
+    <% if (product.image) { %>
+      <div class="field span-2"><img src="<%= product.image %>" alt="Current main image" class="preview"></div>
+    <% } %>
+    <div class="field span-2">
+      <label for="gallery">Add gallery photos <span class="muted">(up to 5)</span></label>
+      <input id="gallery" type="file" name="gallery" accept="image/*" multiple>
+    </div>
+    <% if (gallery.length) { %>
+      <div class="field span-2">
+        <label>Current gallery <span class="muted">(tick to remove)</span></label>
+        <div class="gallery-edit">
+          <% gallery.forEach(g => { %>
+            <label><img src="<%= g.image %>" alt=""><span><input type="checkbox" name="remove_image" value="<%= g.id %>"> remove</span></label>
+          <% }) %>
+        </div>
+      </div>
+    <% } %>
+  </div>
+  <div class="form-actions">
+    <a href="/admin/products" class="btn btn-ghost">Cancel</a>
+    <button class="btn"><%= product.id ? 'Save changes' : 'Add product' %></button>
+  </div>
+</form>
+
+<%- include('_bottom') %>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= title %> | <%= store.name %> Admin</title>
+  <link rel="icon" href="/images/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="admin">
+<div class="admin-shell">
+  <aside class="admin-side"><div class="admin-side-inner">
+    <a href="/admin" class="brand brand-admin">
+      <img src="/images/logo.svg" alt="" width="36" height="36">
+      <span><strong><%= store.name %></strong><small>Admin panel</small></span>
+    </a>
+    <nav>
+      <a href="/admin" class="<%= path === '/admin' || path === '/admin/' ? 'active' : '' %>">Dashboard</a>
+      <a href="/admin/products" class="<%= path.startsWith('/admin/products') ? 'active' : '' %>">Products</a>
+      <a href="/admin/categories" class="<%= path.startsWith('/admin/categories') ? 'active' : '' %>">Categories</a>
+      <a href="/admin/customers" class="<%= path.startsWith('/admin/customers') ? 'active' : '' %>">Customers</a>
+      <a href="/admin/orders" class="<%= path.startsWith('/admin/orders') ? 'active' : '' %>">Orders</a>
+      <a href="/admin/reviews" class="<%= path.startsWith('/admin/reviews') ? 'active' : '' %>">Reviews</a>
+    </nav>
+    <div class="admin-side-foot">
+      <a href="/" target="_blank">View store ↗</a>
+      <form action="/logout" method="post"><button class="link-btn">Logout</button></form>
+    </div>
+  </div></aside>
+  <div class="admin-main">
+    <header class="admin-top">
+      <h1><%= title %></h1>
+      <span class="muted">Signed in as <strong><%= user.name %></strong></span>
+    </header>
+    <% if (flash) { %><div class="alert alert-<%= flash.type %>"><%= flash.text %></div><% } %>

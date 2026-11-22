@@ -1,0 +1,26 @@
+{
+  "name": "haven-goods",
+  "version": "1.0.0",
+  "description": "Haven Goods - e-commerce website for a local business (Node.js, Express, EJS, SQLite)",
+  "main": "server.js",
+  "private": true,
+  "scripts": {
+    "start": "node --no-warnings server.js",
+    "reset-db": "node --no-warnings scripts/reset-db.js",
+    "screenshots": "node --no-warnings scripts/screenshots.js",
+    "report": "node scripts/build-report.js"
+  },
+  "engines": {
+    "node": "22.x || 24.x"
+  },
+  "dependencies": {
+    "cookie-session": "^2.1.1",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "multer": "^1.4.5-lts.1"
+  },
+  "devDependencies": {
+    "marked": "^12.0.2",
+    "puppeteer-core": "^23.11.1"
+  }
+}

@@ -1,0 +1,63 @@
+<%- include('partials/header') %>
+
+<div class="account-layout">
+  <aside class="card account-nav">
+    <p class="muted">Hello,</p>
+    <h3><%= customer.name %></h3>
+    <nav>
+      <a href="#orders" class="active">📦 My Orders</a>
+      <a href="/wishlist">♥ My Wishlist (<%= wishCount %>)</a>
+      <a href="#profile">👤 My Profile</a>
+      <a href="/help">❓ Help Center</a>
+    </nav>
+    <form action="/logout" method="post"><button class="btn btn-ghost btn-block">Logout</button></form>
+  </aside>
+
+  <div>
+    <div class="acct-stats">
+      <div class="card"><small class="muted">Total orders</small><b><%= orders.length %></b></div>
+      <div class="card"><small class="muted">To receive</small><b><%= orders.filter(o => ['Pending','Processing','Shipped'].includes(o.status)).length %></b></div>
+      <div class="card"><small class="muted">Delivered</small><b><%= orders.filter(o => o.status === 'Delivered').length %></b></div>
+      <div class="card"><small class="muted">Wishlist</small><b><%= wishCount %></b></div>
+    </div>
+
+    <section class="card" id="orders">
+      <h3>My Orders</h3>
+      <% if (!orders.length) { %>
+        <p class="muted">You haven't placed any orders yet. <a href="/products">Start shopping</a>.</p>
+      <% } %>
+      <% orders.forEach(o => { %>
+        <div class="order-card">
+          <div class="order-card-head">
+            <span>Order <b>#<%= o.id %></b> <span class="muted">· Placed on <%= String(o.created_at).slice(0, 10) %></span></span>
+            <a href="/account/orders/<%= o.id %>">Manage / Track ›</a>
+          </div>
+          <div class="order-card-body">
+            <div class="order-thumbs">
+              <% o.items.slice(0, 4).forEach(i => { %><img src="<%= i.image || '/images/logo.svg' %>" alt="<%= i.product_name %>" title="<%= i.product_name %>"><% }) %>
+              <span class="muted"><%= o.items.length === 1 ? o.items[0].product_name : `${o.items.length} items` %></span>
+            </div>
+            <span class="badge status-<%= o.status.toLowerCase() %>"><%= o.status %></span>
+            <span class="muted"><%= paymentLabels[o.payment_method] %></span>
+            <b><%= money(o.total) %></b>
+          </div>
+        </div>
+      <% }) %>
+    </section>
+
+    <form action="/account" method="post" class="card" id="profile">
+      <h3>My Profile</h3>
+      <div class="form-grid">
+        <div class="field"><label for="name">Full name</label><input id="name" name="name" value="<%= customer.name %>" required></div>
+        <div class="field"><label>Email</label><input value="<%= customer.email %>" disabled></div>
+        <div class="field"><label for="phone">Phone</label><input id="phone" name="phone" value="<%= customer.phone || '' %>"></div>
+        <div class="field"><label for="city">City</label><input id="city" name="city" value="<%= customer.city || '' %>"></div>
+        <div class="field span-2"><label for="address">Address</label><input id="address" name="address" value="<%= customer.address || '' %>"></div>
+      </div>
+      <button class="btn">Save changes</button>
+      <span class="hint">Member since <%= String(customer.created_at).slice(0, 10) %></span>
+    </form>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

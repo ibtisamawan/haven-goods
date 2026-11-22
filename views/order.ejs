@@ -1,0 +1,90 @@
+<%- include('partials/header') %>
+<% const flow = ['Pending', 'Processing', 'Shipped', 'Delivered'];
+   const labels = { Pending: 'Order placed', Processing: 'Packed', Shipped: 'Shipped', Delivered: 'Delivered' };
+   const reached = order.status === 'Cancelled' ? -1 : flow.indexOf(order.status); %>
+
+<% if (placed) { %>
+  <div class="success-banner">
+    <div class="check" aria-hidden="true">✓</div>
+    <div>
+      <h1>Thank you for your order!</h1>
+      <p>Your order <strong>#<%= order.id %></strong> has been placed. We'll call you on <%= order.phone %> to confirm delivery. You can track it on this page at any time.</p>
+    </div>
+  </div>
+<% } else { %>
+  <div class="breadcrumb"><a href="/account">My Account</a> › Order #<%= order.id %></div>
+<% } %>
+
+<div class="order-layout">
+  <div>
+    <section class="card">
+      <div class="order-head">
+        <div>
+          <h2>Order #<%= order.id %></h2>
+          <span class="muted">Placed on <%= order.created_at %></span>
+        </div>
+        <span class="badge badge-lg status-<%= order.status.toLowerCase() %>"><%= order.status %></span>
+      </div>
+
+      <% if (order.status === 'Cancelled') { %>
+        <div class="alert alert-error">This order was cancelled.<% if (order.payment_method !== 'COD') { %> Payment status: <%= order.payment_status %>.<% } %></div>
+      <% } else { %>
+        <ol class="tracker">
+          <% flow.forEach((s, i) => { %>
+            <li class="<%= i <= reached ? 'done' : '' %><%= i === reached ? ' current' : '' %>">
+              <span class="dot"><%= i <= reached ? '✓' : i + 1 %></span>
+              <span><%= labels[s] %></span>
+            </li>
+          <% }) %>
+        </ol>
+      <% } %>
+
+      <h4>Tracking history</h4>
+      <ul class="history">
+        <% history.slice().reverse().forEach(h => { %>
+          <li><span class="muted"><%= h.created_at %></span><b><%= h.status %></b><span><%= h.note %></span></li>
+        <% }) %>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h3>Items in this order</h3>
+      <% items.forEach(i => { %>
+        <div class="order-item">
+          <img src="<%= i.image || '/images/logo.svg' %>" alt="">
+          <div>
+            <% if (i.product_id) { %><a href="/products/<%= i.product_id %>"><%= i.product_name %></a><% } else { %><%= i.product_name %><% } %>
+            <small class="muted">Qty: <%= i.quantity %> × <%= money(i.price) %></small>
+            <% if (order.status === 'Delivered' && i.product_id) { %><a class="small-link" href="/products/<%= i.product_id %>#reviews">★ Write a review</a><% } %>
+          </div>
+          <b><%= money(i.price * i.quantity) %></b>
+        </div>
+      <% }) %>
+    </section>
+  </div>
+
+  <aside>
+    <section class="card">
+      <h3>Order summary</h3>
+      <div class="sum-row"><span>Subtotal</span><span><%= money(order.subtotal) %></span></div>
+      <div class="sum-row"><span>Delivery fee</span><span><%= order.shipping ? money(order.shipping) : 'Free' %></span></div>
+      <div class="sum-row sum-total"><span>Total</span><span class="total-price"><%= money(order.total) %></span></div>
+      <div class="sum-row"><span>Payment</span><span><%= paymentLabels[order.payment_method] %></span></div>
+      <div class="sum-row"><span>Payment status</span><span><%= order.payment_status %></span></div>
+    </section>
+    <section class="card">
+      <h3>Delivery address</h3>
+      <p class="addr"><b><%= order.customer_name %></b><br><%= order.address %>, <%= order.city %><br><%= order.phone %><br><%= order.email %></p>
+      <% if (order.notes) { %><p class="hint">Note: <%= order.notes %></p><% } %>
+    </section>
+    <% if (order.status === 'Pending') { %>
+      <form action="/account/orders/<%= order.id %>/cancel" method="post" data-confirm="Cancel order #<%= order.id %>?">
+        <button class="btn btn-danger btn-block">Cancel order</button>
+      </form>
+    <% } %>
+    <a href="/products" class="btn btn-outline btn-block">Continue shopping</a>
+    <a href="/account" class="btn btn-ghost btn-block">All my orders</a>
+  </aside>
+</div>
+
+<%- include('partials/footer') %>

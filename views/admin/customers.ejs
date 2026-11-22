@@ -1,0 +1,29 @@
+<%- include('_top') %>
+
+<section class="card">
+  <table class="table">
+    <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>City</th><th>Joined</th><th>Orders</th><th>Spent</th><th class="right">Actions</th></tr></thead>
+    <tbody>
+      <% customers.forEach(c => { %>
+        <tr>
+          <td><strong><%= c.name %></strong></td>
+          <td><%= c.email %></td>
+          <td><%= c.phone %></td>
+          <td><%= c.city %></td>
+          <td><%= String(c.created_at).slice(0, 10) %></td>
+          <td><%= c.order_count %></td>
+          <td><%= money(c.total_spent) %></td>
+          <td class="right nowrap">
+            <a href="/admin/customers/<%= c.id %>" class="btn btn-sm btn-outline">View</a>
+            <form action="/admin/customers/<%= c.id %>/delete" method="post" class="inline" data-confirm="Delete customer &quot;<%= c.name %>&quot; and all their orders?">
+              <button class="btn btn-sm btn-danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+      <% if (!customers.length) { %><tr><td colspan="8" class="muted">No customers have registered yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</section>
+
+<%- include('_bottom') %>

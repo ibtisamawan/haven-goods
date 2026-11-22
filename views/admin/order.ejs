@@ -1,0 +1,72 @@
+<%- include('_top') %>
+
+<div class="breadcrumb"><a href="/admin/orders">Orders</a> › #<%= order.id %></div>
+
+<div class="admin-grid">
+  <div class="stack">
+    <section class="card">
+      <h3>Items</h3>
+      <table class="table">
+        <thead><tr><th></th><th>Product</th><th>Price</th><th>Qty</th><th class="right">Total</th></tr></thead>
+        <tbody>
+          <% items.forEach(i => { %>
+            <tr>
+              <td><img class="thumb" src="<%= i.image || '/images/logo.svg' %>" alt=""></td>
+              <td><% if (i.product_id) { %><a href="/products/<%= i.product_id %>" target="_blank"><%= i.product_name %></a><% } else { %><%= i.product_name %> <small class="muted">(deleted)</small><% } %></td>
+              <td><%= money(i.price) %></td><td><%= i.quantity %></td><td class="right"><%= money(i.price * i.quantity) %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+        <tfoot>
+          <tr><td colspan="4">Subtotal</td><td class="right"><%= money(order.subtotal) %></td></tr>
+          <tr><td colspan="4">Shipping</td><td class="right"><%= order.shipping ? money(order.shipping) : 'Free' %></td></tr>
+          <tr class="sum-total"><td colspan="4">Total</td><td class="right"><%= money(order.total) %></td></tr>
+        </tfoot>
+      </table>
+    </section>
+    <section class="card">
+      <h3>Customer &amp; delivery</h3>
+      <dl class="details">
+        <dt>Name</dt><dd><a href="/admin/customers/<%= order.user_id %>"><%= order.customer_name %></a></dd>
+        <dt>Email</dt><dd><%= order.email %></dd>
+        <dt>Phone</dt><dd><%= order.phone %></dd>
+        <dt>Address</dt><dd><%= order.address %>, <%= order.city %></dd>
+        <dt>Notes</dt><dd><%= order.notes || '—' %></dd>
+      </dl>
+    </section>
+    <section class="card">
+      <h3>Tracking history</h3>
+      <ul class="history">
+        <% history.forEach(h => { %>
+          <li><span class="muted"><%= h.created_at %></span><b><%= h.status %></b><span><%= h.note %></span></li>
+        <% }) %>
+      </ul>
+    </section>
+  </div>
+
+  <aside class="card">
+    <h3>Order status</h3>
+    <p><span class="badge badge-lg status-<%= order.status.toLowerCase() %>"><%= order.status %></span></p>
+    <dl class="details">
+      <dt>Placed</dt><dd><%= order.created_at %></dd>
+      <dt>Payment</dt><dd><%= paymentLabels[order.payment_method] %></dd>
+      <dt>Pay status</dt><dd><%= order.payment_status %></dd>
+    </dl>
+    <form action="/admin/orders/<%= order.id %>/status" method="post" id="status-update">
+      <div class="field">
+        <label for="status">Change status</label>
+        <select id="status" name="status">
+          <% statuses.forEach(s => { %><option <%= order.status === s ? 'selected' : '' %>><%= s %></option><% }) %>
+        </select>
+      </div>
+      <div class="field">
+        <label for="note">Note for the customer <span class="muted">(optional)</span></label>
+        <input id="note" name="note" placeholder="e.g. Courier tracking no. TCS-123456">
+      </div>
+      <button class="btn btn-block">Update status</button>
+    </form>
+    <p class="hint">The customer sees every status change on their order tracking page. Cash on Delivery orders are marked paid when delivered; cancelling returns items to stock.</p>
+  </aside>
+</div>
+
+<%- include('_bottom') %>

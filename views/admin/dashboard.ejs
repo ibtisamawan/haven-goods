@@ -1,0 +1,69 @@
+<%- include('_top') %>
+
+<div class="stat-grid">
+  <a class="stat" href="/admin/orders"><span>Total revenue</span><strong><%= money(stats.revenue) %></strong><small>excluding cancelled orders</small></a>
+  <a class="stat" href="/admin/orders"><span>Orders</span><strong><%= stats.orders %></strong><small><%= stats.pending %> awaiting action</small></a>
+  <a class="stat" href="/admin/customers"><span>Customers</span><strong><%= stats.customers %></strong><small>registered accounts</small></a>
+  <a class="stat" href="/admin/products"><span>Products</span><strong><%= stats.products %></strong><small>in <%= stats.categories %> categories · <%= stats.reviews %> reviews</small></a>
+</div>
+
+<div class="admin-grid">
+  <div class="stack">
+    <section class="card">
+      <div class="card-head"><h3>Recent orders</h3><a href="/admin/orders">View all</a></div>
+      <table class="table">
+        <thead><tr><th>Order</th><th>Customer</th><th>Date</th><th>Payment</th><th>Total</th><th>Status</th></tr></thead>
+        <tbody>
+          <% recentOrders.forEach(o => { %>
+            <tr>
+              <td><a href="/admin/orders/<%= o.id %>">#<%= o.id %></a></td>
+              <td><%= o.customer_name %><br><small class="muted"><%= o.city %></small></td>
+              <td><%= String(o.created_at).slice(0, 10) %></td>
+              <td><%= paymentLabels[o.payment_method] %></td>
+              <td><%= money(o.total) %></td>
+              <td><span class="badge status-<%= o.status.toLowerCase() %>"><%= o.status %></span></td>
+            </tr>
+          <% }) %>
+          <% if (!recentOrders.length) { %><tr><td colspan="6" class="muted">No orders yet.</td></tr><% } %>
+        </tbody>
+      </table>
+    </section>
+    <section class="card">
+      <h3>Best-selling products</h3>
+      <ul class="status-list">
+        <% topSelling.forEach(t => { %>
+          <li><img src="<%= t.image || '/images/logo.svg' %>" alt=""><span class="grow"><%= t.product_name %></span><span class="muted"><%= t.qty %> sold</span><strong><%= money(t.revenue) %></strong></li>
+        <% }) %>
+        <% if (!topSelling.length) { %><li class="muted">No sales yet.</li><% } %>
+      </ul>
+    </section>
+  </div>
+
+  <div class="stack">
+    <section class="card">
+      <h3>Orders by status</h3>
+      <ul class="status-list">
+        <% byStatus.forEach(s => { %>
+          <li><a href="/admin/orders?status=<%= s.status %>"><span class="badge status-<%= s.status.toLowerCase() %>"><%= s.status %></span></a><strong><%= s.count %></strong></li>
+        <% }) %>
+      </ul>
+    </section>
+    <section class="card">
+      <h3>Low stock (10 or less)</h3>
+      <% if (!lowStock.length) { %><p class="muted">All products are well stocked.</p><% } %>
+      <ul class="status-list">
+        <% lowStock.forEach(p => { %>
+          <li><img src="<%= p.image %>" alt=""><a class="grow" href="/admin/products/<%= p.id %>/edit"><%= p.name %></a><strong class="<%= p.stock === 0 ? 'text-danger' : '' %>"><%= p.stock === 0 ? 'Out' : p.stock %></strong></li>
+        <% }) %>
+      </ul>
+    </section>
+    <section class="card">
+      <h3>Quick actions</h3>
+      <a href="/admin/products/new" class="btn btn-block">+ Add new product</a>
+      <a href="/admin/categories" class="btn btn-outline btn-block">Manage categories</a>
+      <a href="/admin/orders?status=Pending" class="btn btn-outline btn-block">Process pending orders</a>
+    </section>
+  </div>
+</div>
+
+<%- include('_bottom') %>

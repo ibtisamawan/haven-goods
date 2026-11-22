@@ -1,0 +1,31 @@
+<% const off = discount(p); %>
+<article class="pcard<%= p.stock <= 0 ? ' is-out' : '' %>">
+  <a href="/products/<%= p.id %>" class="pcard-img">
+    <img src="<%= p.image %>" alt="<%= p.name %>" loading="lazy">
+    <% if (off) { %><span class="off-badge">-<%= off %>%</span><% } %>
+    <% if (p.stock <= 0) { %><span class="out-badge">Out of stock</span><% } %>
+  </a>
+  <form action="/wishlist/<%= p.id %>" method="post" class="pcard-wish">
+    <button title="Add to wishlist" aria-label="Add <%= p.name %> to wishlist">♥</button>
+  </form>
+  <a href="/products/<%= p.id %>" class="pcard-body">
+    <h3 class="pcard-title"><%= p.name %></h3>
+    <div class="pcard-price"><%= money(p.price) %></div>
+    <div class="pcard-old">
+      <% if (off) { %><s><%= money(p.old_price) %></s> <span>-<%= off %>%</span><% } else { %>&nbsp;<% } %>
+    </div>
+    <div class="pcard-meta">
+      <% if (p.review_count) { %>
+        <span class="stars" style="--r: <%= p.rating %>" aria-label="Rated <%= p.rating %> out of 5"></span>
+        <span class="muted">(<%= p.review_count %>)</span>
+      <% } %>
+      <span class="muted sold"><%= compact(p.sold_count) %> sold</span>
+    </div>
+  </a>
+  <% if (p.stock > 0) { %>
+    <form action="/cart/add" method="post" class="pcard-cart">
+      <input type="hidden" name="product_id" value="<%= p.id %>">
+      <button>Add to cart</button>
+    </form>
+  <% } %>
+</article>

@@ -1,0 +1,100 @@
+<%- include('partials/header') %>
+
+<div class="breadcrumb"><a href="/cart">Cart</a> › Checkout</div>
+
+<% if (errors.length) { %>
+  <div class="alert alert-error"><ul><% errors.forEach(e => { %><li><%= e %></li><% }) %></ul></div>
+<% } %>
+
+<form action="/checkout" method="post" class="checkout-layout" id="checkout-form">
+  <div>
+    <section class="card">
+      <h3><span class="step">1</span> Shipping address</h3>
+      <div class="form-grid">
+        <div class="field">
+          <label for="name">Full name</label>
+          <input id="name" name="name" value="<%= form.name %>" required>
+        </div>
+        <div class="field">
+          <label for="phone">Phone number</label>
+          <input id="phone" name="phone" value="<%= form.phone || '' %>" placeholder="03XX-XXXXXXX" required>
+        </div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" name="email" value="<%= form.email %>" required>
+        </div>
+        <div class="field">
+          <label for="city">City</label>
+          <input id="city" name="city" value="<%= form.city || '' %>" list="cities" required>
+          <datalist id="cities"><option>Lahore</option><option>Karachi</option><option>Islamabad</option><option>Rawalpindi</option><option>Faisalabad</option><option>Multan</option><option>Peshawar</option><option>Quetta</option></datalist>
+        </div>
+        <div class="field span-2">
+          <label for="address">Address</label>
+          <input id="address" name="address" value="<%= form.address || '' %>" placeholder="House no., street, area" required>
+        </div>
+        <div class="field span-2">
+          <label for="notes">Delivery instructions <span class="muted">(optional)</span></label>
+          <textarea id="notes" name="notes" rows="2" placeholder="e.g. Please call before delivery"><%= form.notes || '' %></textarea>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3><span class="step">2</span> Select payment method</h3>
+      <div class="pay-options">
+        <label class="pay-option">
+          <input type="radio" name="payment_method" value="COD" <%= form.payment_method === 'COD' || !form.payment_method ? 'checked' : '' %>>
+          <span class="pay-ico">💵</span>
+          <span><strong>Cash on Delivery</strong><small>Pay in cash when your order arrives at your door.</small></span>
+        </label>
+        <label class="pay-option">
+          <input type="radio" name="payment_method" value="CARD" <%= form.payment_method === 'CARD' ? 'checked' : '' %>>
+          <span class="pay-ico">💳</span>
+          <span><strong>Credit / Debit Card <em class="demo-tag">Demo</em></strong><small>Example of an online payment. No real payment is processed.</small></span>
+          <span class="card-logos" aria-hidden="true"><b>VISA</b><b>Mastercard</b></span>
+        </label>
+        <label class="pay-option">
+          <input type="radio" name="payment_method" value="WALLET" <%= form.payment_method === 'WALLET' ? 'checked' : '' %>>
+          <span class="pay-ico">📱</span>
+          <span><strong>Mobile Wallet <em class="demo-tag">Demo</em></strong><small>Example of paying from a mobile wallet account. No real payment is processed.</small></span>
+        </label>
+      </div>
+
+      <!-- Demo payment forms: these fields have no "name" attribute, so nothing typed here is ever sent to the server. -->
+      <div class="pay-demo" data-for="CARD" hidden>
+        <p class="hint">Demonstration only. Card details are <strong>not</strong> sent or saved. Sample values are filled in.</p>
+        <div class="form-grid">
+          <div class="field span-2"><label for="cc-number">Card number</label><input id="cc-number" autocomplete="off" inputmode="numeric" value="4242 4242 4242 4242"></div>
+          <div class="field"><label for="cc-name">Name on card</label><input id="cc-name" autocomplete="off" value="<%= form.name %>"></div>
+          <div class="field form-grid two"><div class="field"><label for="cc-exp">Expiry</label><input id="cc-exp" autocomplete="off" value="12/30"></div><div class="field"><label for="cc-cvc">CVC</label><input id="cc-cvc" autocomplete="off" value="123"></div></div>
+        </div>
+      </div>
+      <div class="pay-demo" data-for="WALLET" hidden>
+        <p class="hint">Demonstration only. Nothing is charged. In a real store you would confirm the payment in your wallet app.</p>
+        <div class="field"><label for="wallet-no">Wallet account number</label><input id="wallet-no" autocomplete="off" inputmode="numeric" value="<%= form.phone || '03001234567' %>"></div>
+      </div>
+    </section>
+  </div>
+
+  <aside class="card summary">
+    <h3><span class="step">3</span> Order summary</h3>
+    <ul class="summary-items">
+      <% cart.items.forEach(i => { %>
+        <li>
+          <img src="<%= i.product.image %>" alt="">
+          <span><%= i.product.name %><small class="muted">Qty: <%= i.quantity %> × <%= money(i.product.price) %></small></span>
+          <strong><%= money(i.lineTotal) %></strong>
+        </li>
+      <% }) %>
+    </ul>
+    <div class="sum-row"><span>Items total (<%= cart.count %>)</span><span><%= money(cart.subtotal) %></span></div>
+    <div class="sum-row"><span>Delivery fee</span><span><%= cart.shipping ? money(cart.shipping) : 'Free' %></span></div>
+    <% if (cart.savings) { %><div class="sum-row save"><span>You save</span><span>− <%= money(cart.savings) %></span></div><% } %>
+    <div class="sum-row sum-total"><span>Total</span><span class="total-price"><%= money(cart.total) %></span></div>
+    <p class="hint">VAT included, where applicable</p>
+    <button class="btn btn-lg btn-block btn-buy" id="place-order">Place Order</button>
+    <a href="/cart" class="btn btn-ghost btn-block">Back to cart</a>
+  </aside>
+</form>
+
+<%- include('partials/footer') %>

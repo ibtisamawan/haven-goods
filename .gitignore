@@ -1,0 +1,7 @@
+node_modules/
+database/shop.db*
+public/uploads/*
+!public/uploads/.gitkeep
+
+.vercel
+.env*

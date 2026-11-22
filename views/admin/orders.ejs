@@ -1,0 +1,39 @@
+<%- include('_top') %>
+
+<div class="filter-tabs">
+  <a href="/admin/orders" class="<%= !status ? 'active' : '' %>">All (<%= Object.values(counts).reduce((a, b) => a + b, 0) %>)</a>
+  <% statuses.forEach(s => { %>
+    <a href="/admin/orders?status=<%= s %>" class="<%= status === s ? 'active' : '' %>"><%= s %> (<%= counts[s] %>)</a>
+  <% }) %>
+</div>
+
+<section class="card">
+  <table class="table">
+    <thead><tr><th>Order</th><th>Date</th><th>Customer</th><th>City</th><th>Total</th><th>Payment</th><th>Status</th><th class="right">Update status</th></tr></thead>
+    <tbody>
+      <% orders.forEach(o => { %>
+        <tr>
+          <td><a href="/admin/orders/<%= o.id %>"><strong>#<%= o.id %></strong></a></td>
+          <td><%= String(o.created_at).slice(0, 16) %></td>
+          <td><%= o.customer_name %><br><small class="muted"><%= o.phone %></small></td>
+          <td><%= o.city %></td>
+          <td><%= money(o.total) %></td>
+          <td><%= paymentLabels[o.payment_method] %><br><small class="muted"><%= o.payment_status %></small></td>
+          <td><span class="badge status-<%= o.status.toLowerCase() %>"><%= o.status %></span></td>
+          <td class="right">
+            <form action="/admin/orders/<%= o.id %>/status" method="post" class="status-form">
+              <input type="hidden" name="back" value="list">
+              <select name="status" aria-label="Status for order <%= o.id %>">
+                <% statuses.forEach(s => { %><option <%= o.status === s ? 'selected' : '' %>><%= s %></option><% }) %>
+              </select>
+              <button class="btn btn-sm">Save</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+      <% if (!orders.length) { %><tr><td colspan="8" class="muted">No orders<%= status ? ' with status ' + status : '' %>.</td></tr><% } %>
+    </tbody>
+  </table>
+</section>
+
+<%- include('_bottom') %>

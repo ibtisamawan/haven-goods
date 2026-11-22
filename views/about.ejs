@@ -1,0 +1,21 @@
+<%- include('partials/header') %>
+
+<section class="about">
+  <div>
+    <span class="eyebrow">About us</span>
+    <h1>A local shop that grew with its neighbourhood</h1>
+    <p><%= store.name %> opened its doors on Main Bazaar in 2012 as a small family shop selling electronics and books. Over the years our customers asked for more, and today we stock clothing, accessories and everyday gadgets as well.</p>
+    <p>This website lets you browse our full range from home, add products to your cart and choose to pay with cash on delivery or online. Our team packs every order in the shop and delivers across the city.</p>
+  </div>
+  <div class="card">
+    <h3>Visit or contact us</h3>
+    <dl class="details">
+      <dt>Address</dt><dd><%= store.address %></dd>
+      <dt>Phone</dt><dd><%= store.phone %></dd>
+      <dt>Email</dt><dd><%= store.email %></dd>
+      <dt>Hours</dt><dd>Mon–Sat, 10:00 am – 9:00 pm</dd>
+    </dl>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

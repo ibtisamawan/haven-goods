@@ -1,0 +1,19 @@
+<%- include('partials/header') %>
+
+<div class="breadcrumb"><a href="/account">My Account</a> › My Wishlist</div>
+<h1>My Wishlist <span class="muted">(<%= products.length %>)</span></h1>
+
+<% if (!products.length) { %>
+  <div class="empty">
+    <div class="empty-ico">♡</div>
+    <h3>Your wishlist is empty</h3>
+    <p class="muted">Tap the heart on any product to save it here for later.</p>
+    <a class="btn" href="/products">Discover products</a>
+  </div>
+<% } else { %>
+  <div class="grid grid-5 wish-grid">
+    <% products.forEach(p => { %><%- include('partials/product-card', { p }) %><% }) %>
+  </div>
+<% } %>
+
+<%- include('partials/footer') %>

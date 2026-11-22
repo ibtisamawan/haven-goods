@@ -1,0 +1,179 @@
+<%- include('partials/header') %>
+<% const off = discount(product); const isBook = product.category_name === 'Books'; %>
+
+<div class="breadcrumb">
+  <a href="/">Home</a> › <a href="/products?category=<%= product.category_id %>"><%= product.category_name %></a> › <%= product.name %>
+</div>
+
+<div class="pdp">
+  <div class="gallery">
+    <div class="gallery-main"><img src="<%= images[0] %>" alt="<%= product.name %>" id="main-image"></div>
+    <% if (images.length > 1) { %>
+      <div class="thumbs">
+        <% images.forEach((img, i) => { %>
+          <button type="button" class="thumb-btn<%= i === 0 ? ' active' : '' %>" data-image="<%= img %>" aria-label="Show image <%= i + 1 %>">
+            <img src="<%= img %>" alt="">
+          </button>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+
+  <div class="pdp-info">
+    <h1><%= product.name %></h1>
+    <div class="pdp-rating">
+      <% if (product.review_count) { %>
+        <span class="stars" style="--r: <%= product.rating %>"></span>
+        <a href="#reviews"><%= product.rating %> · <%= product.review_count %> Ratings</a>
+      <% } else { %>
+        <a href="#reviews" class="muted">No ratings yet</a>
+      <% } %>
+      <span class="sep">|</span>
+      <span class="muted"><%= compact(product.sold_count) %> sold</span>
+      <form action="/wishlist/<%= product.id %>" method="post" class="inline wish-inline">
+        <button class="wish-btn<%= inWishlist ? ' on' : '' %>" title="<%= inWishlist ? 'Remove from' : 'Add to' %> wishlist">♥ <%= inWishlist ? 'Saved' : 'Save' %></button>
+      </form>
+    </div>
+    <% if (product.brand) { %>
+      <p class="pdp-brand"><%= isBook ? 'Author' : 'Brand' %>: <a href="/products?brand=<%= encodeURIComponent(product.brand) %>"><%= product.brand %></a>
+        <span class="sep">|</span> <a href="/products?category=<%= product.category_id %>">More <%= product.category_name %></a></p>
+    <% } %>
+
+    <div class="pdp-price">
+      <span class="now"><%= money(product.price) %></span>
+      <% if (off) { %><span class="was"><s><%= money(product.old_price) %></s> <b>-<%= off %>%</b></span><% } %>
+    </div>
+
+    <% if (product.stock > 0) { %>
+      <form action="/cart/add" method="post" class="add-form">
+        <input type="hidden" name="product_id" value="<%= product.id %>">
+        <div class="qty-line">
+          <span class="muted">Quantity</span>
+          <div class="stepper">
+            <button type="button" data-step="-1" aria-label="Decrease">−</button>
+            <input type="number" id="quantity" name="quantity" value="1" min="1" max="<%= product.stock %>" aria-label="Quantity">
+            <button type="button" data-step="1" aria-label="Increase">+</button>
+          </div>
+          <span class="<%= product.stock <= 10 ? 'low-stock' : 'muted' %>">
+            <%= product.stock <= 10 ? `Only ${product.stock} left!` : `${product.stock} in stock` %>
+          </span>
+        </div>
+        <div class="buy-btns">
+          <button class="btn btn-lg btn-buy" name="buy_now" value="1">Buy Now</button>
+          <button class="btn btn-lg" id="add-to-cart">Add to Cart</button>
+        </div>
+      </form>
+    <% } else { %>
+      <div class="alert alert-error">This product is currently out of stock.</div>
+    <% } %>
+  </div>
+
+  <aside class="pdp-side">
+    <div class="side-block">
+      <h4>Delivery</h4>
+      <div class="side-row"><span class="ico">📍</span><span><%= city || 'Lahore' %>, Pakistan<small class="muted"><%= city ? 'Your saved city' : 'Log in to use your address' %></small></span></div>
+      <div class="side-row"><span class="ico">🚚</span><span>Standard Delivery<small class="muted">3–5 working days</small></span>
+        <b><%= product.price >= store.freeShippingOver ? 'Free' : money(store.shippingFee) %></b></div>
+      <div class="side-row"><span class="ico">💵</span><span>Cash on Delivery available</span></div>
+    </div>
+    <div class="side-block">
+      <h4>Return &amp; Warranty</h4>
+      <div class="side-row"><span class="ico">↩️</span><span>7 days easy return</span></div>
+      <div class="side-row"><span class="ico">🛡️</span><span><%= product.warranty || 'No warranty' %></span></div>
+    </div>
+    <div class="side-block seller">
+      <h4>Sold by</h4>
+      <div class="seller-name"><img src="/images/logo.svg" alt="" width="28" height="28"> <b><%= store.name %> Official Store</b></div>
+      <div class="seller-stats">
+        <div><small>Positive ratings</small><b>96%</b></div>
+        <div><small>Ship on time</small><b>98%</b></div>
+        <div><small>Chat response</small><b>92%</b></div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<section class="block">
+  <div class="block-head"><h2>Product details of <%= product.name %></h2></div>
+  <div class="details-grid">
+    <div class="desc">
+      <p><%= product.description %></p>
+      <ul class="highlights">
+        <li>100% original product<%= product.brand ? ` from ${product.brand}` : '' %></li>
+        <li><%= product.warranty || 'No warranty' %></li>
+        <li>Cash on Delivery and 7-day returns</li>
+      </ul>
+    </div>
+    <table class="spec-table">
+      <tr><th><%= isBook ? 'Author' : 'Brand' %></th><td><%= product.brand || 'Generic' %></td></tr>
+      <tr><th>Category</th><td><%= product.category_name %></td></tr>
+      <tr><th>SKU</th><td>HG-<%= String(product.id).padStart(5, '0') %></td></tr>
+      <% String(product.specs || '').split('\n').filter(Boolean).forEach(line => { const i = line.indexOf(':'); %>
+        <tr><th><%= line.slice(0, i) %></th><td><%= line.slice(i + 1).trim() %></td></tr>
+      <% }) %>
+    </table>
+  </div>
+</section>
+
+<section class="block" id="reviews">
+  <div class="block-head"><h2>Ratings &amp; Reviews of <%= product.name %></h2></div>
+  <div class="reviews-top">
+    <div class="score">
+      <b><%= product.rating || '0.0' %></b><span>/5</span>
+      <div><span class="stars stars-lg" style="--r: <%= product.rating || 0 %>"></span></div>
+      <small class="muted"><%= product.review_count %> Ratings</small>
+    </div>
+    <div class="bars">
+      <% breakdown.forEach(b => { %>
+        <div class="bar-row">
+          <span class="stars" style="--r: <%= b.star %>"></span>
+          <div class="bar"><i style="width: <%= product.review_count ? (b.count / product.review_count * 100) : 0 %>%"></i></div>
+          <span class="muted"><%= b.count %></span>
+        </div>
+      <% }) %>
+    </div>
+    <div class="review-form-wrap">
+      <% if (user) { %>
+        <form action="/products/<%= product.id %>/reviews" method="post" class="review-form">
+          <h4><%= myReview ? 'Update your review' : 'Write a review' %></h4>
+          <div class="star-input" role="radiogroup" aria-label="Your rating">
+            <% [5, 4, 3, 2, 1].forEach(s => { %>
+              <input type="radio" id="star<%= s %>" name="rating" value="<%= s %>" <%= myReview && myReview.rating === s ? 'checked' : '' %>>
+              <label for="star<%= s %>" title="<%= s %> stars">★</label>
+            <% }) %>
+          </div>
+          <textarea name="comment" rows="3" placeholder="What did you like or dislike?"><%= myReview ? myReview.comment : '' %></textarea>
+          <button class="btn btn-sm">Submit review</button>
+        </form>
+      <% } else { %>
+        <p class="muted"><a href="/login">Log in</a> to rate and review this product.</p>
+      <% } %>
+    </div>
+  </div>
+
+  <h4 class="reviews-title">Product Reviews</h4>
+  <% if (!reviews.length) { %><p class="muted">This product has no reviews yet. Be the first to review it!</p><% } %>
+  <div class="review-list">
+    <% reviews.forEach(r => { %>
+      <div class="review">
+        <div class="review-head">
+          <span class="stars" style="--r: <%= r.rating %>"></span>
+          <span class="muted"><%= String(r.created_at).slice(0, 10) %></span>
+        </div>
+        <div class="review-by">by <b><%= r.reviewer_name %></b> <span class="verified">✓ Verified Purchase</span></div>
+        <% if (r.comment) { %><p><%= r.comment %></p><% } %>
+      </div>
+    <% }) %>
+  </div>
+</section>
+
+<% if (related.length) { %>
+<section class="block">
+  <div class="block-head"><h2>You may also like</h2><a href="/products?category=<%= product.category_id %>" class="head-link">View all ›</a></div>
+  <div class="grid grid-6">
+    <% related.forEach(p => { %><%- include('partials/product-card', { p }) %><% }) %>
+  </div>
+</section>
+<% } %>
+
+<%- include('partials/footer') %>

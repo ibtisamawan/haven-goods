@@ -1,0 +1,39 @@
+<%- include('_top') %>
+
+<div class="toolbar">
+  <form method="get" action="/admin/products">
+    <input type="search" name="q" value="<%= q %>" placeholder="Search name or brand" aria-label="Search products">
+    <button class="btn btn-outline">Search</button>
+  </form>
+  <p class="muted"><%= products.length %> products</p>
+  <a href="/admin/products/new" class="btn">+ Add product</a>
+</div>
+
+<section class="card">
+  <table class="table">
+    <thead><tr><th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Sold</th><th>Rating</th><th>Featured</th><th class="right">Actions</th></tr></thead>
+    <tbody>
+      <% products.forEach(p => { const off = discount(p); %>
+        <tr>
+          <td><img class="thumb" src="<%= p.image %>" alt=""></td>
+          <td><strong><%= p.name %></strong><br><small class="muted">#<%= p.id %><%= p.brand ? ' · ' + p.brand : '' %></small></td>
+          <td><%= p.category_name %></td>
+          <td class="price-cell"><%= money(p.price) %><% if (off) { %><s><%= money(p.old_price) %> (-<%= off %>%)</s><% } %></td>
+          <td class="<%= p.stock <= 10 ? 'text-danger' : '' %>"><%= p.stock %></td>
+          <td><%= p.sold_count %></td>
+          <td><%= p.review_count ? `★ ${p.rating} (${p.review_count})` : '—' %></td>
+          <td><%= p.featured ? 'Yes' : '—' %></td>
+          <td class="right nowrap">
+            <a href="/products/<%= p.id %>" class="btn btn-sm btn-ghost" target="_blank">View</a>
+            <a href="/admin/products/<%= p.id %>/edit" class="btn btn-sm btn-outline">Edit</a>
+            <form action="/admin/products/<%= p.id %>/delete" method="post" class="inline" data-confirm="Delete product &quot;<%= p.name %>&quot;?">
+              <button class="btn btn-sm btn-danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</section>
+
+<%- include('_bottom') %>

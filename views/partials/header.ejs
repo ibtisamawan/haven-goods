@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= title %> | <%= store.name %></title>
+  <meta name="description" content="<%= store.name %> - shop electronics, fashion, books, home and beauty products online with cash on delivery.">
+  <link rel="icon" href="/images/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="util-bar">
+  <div class="container">
+    <span>Free delivery on orders over <%= money(store.freeShippingOver) %> &middot; Cash on Delivery nationwide</span>
+    <nav>
+      <a href="/help">Help &amp; Support</a>
+      <a href="/account">Track my order</a>
+      <% if (user) { %>
+        <% if (user.role === 'admin') { %><a href="/admin">Admin panel</a><% } %>
+        <form action="/logout" method="post" class="inline"><button class="util-link">Logout</button></form>
+      <% } else { %>
+        <a href="/login">Login</a>
+        <a href="/register">Sign up</a>
+      <% } %>
+    </nav>
+  </div>
+</div>
+
+<header class="site-header">
+  <div class="container header-row">
+    <a href="/" class="brand">
+      <img src="/images/logo.svg" alt="<%= store.name %> logo" width="42" height="42">
+      <span><strong><%= store.name %></strong><small><%= store.tagline %></small></span>
+    </a>
+
+    <form class="search" action="/products" method="get" role="search" autocomplete="off">
+      <input type="search" name="q" id="search-input" placeholder="Search in <%= store.name %>"
+             aria-label="Search products" value="<%= typeof q !== 'undefined' ? q : '' %>">
+      <button type="submit" aria-label="Search">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M10 2a8 8 0 0 1 6.32 12.9l5.39 5.4-1.41 1.4-5.4-5.38A8 8 0 1 1 10 2Zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12Z"/></svg>
+      </button>
+      <div class="suggest" id="suggest" hidden></div>
+    </form>
+
+    <div class="header-icons">
+      <a href="<%= user ? '/account' : '/login' %>" class="hicon" title="Account">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="currentColor" d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.42 0-8 2.24-8 5v3h16v-3c0-2.76-3.58-5-8-5Z"/></svg>
+        <span><%= user ? user.name.split(' ')[0] : 'Login' %></span>
+      </a>
+      <a href="/wishlist" class="hicon" title="Wishlist">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="currentColor" d="M12 21s-7.5-4.6-10-9.3C.4 8.4 2.3 4 6.3 4c2.2 0 3.6 1.2 4.4 2.4h2.6C14.1 5.2 15.5 4 17.7 4c4 0 5.9 4.4 4.3 7.7C19.5 16.4 12 21 12 21Z"/></svg>
+        <span>Wishlist</span>
+        <% if (wishCount) { %><b class="bubble"><%= wishCount %></b><% } %>
+      </a>
+      <a href="/cart" class="hicon" title="Cart">
+        <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path fill="currentColor" d="M7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM1 2h3.3l.9 2H21a1 1 0 0 1 .96 1.27l-2.6 9A2 2 0 0 1 17.44 16H8.1a2 2 0 0 1-1.93-1.5L3 4H1V2Z"/></svg>
+        <span>Cart</span>
+        <b class="bubble"><%= cartCount %></b>
+      </a>
+    </div>
+  </div>
+  <nav class="cat-nav">
+    <div class="container">
+      <div class="cat-menu">
+        <button type="button" class="cat-menu-btn" aria-haspopup="true">☰ Categories</button>
+        <div class="cat-dropdown">
+          <% navCategories.forEach(c => { %><a href="/products?category=<%= c.id %>"><%= c.name %></a><% }) %>
+        </div>
+      </div>
+      <a href="/products?sort=popular">Best Sellers</a>
+      <a href="/products?sort=newest">New Arrivals</a>
+      <% navCategories.slice(0, 5).forEach(c => { %>
+        <a href="/products?category=<%= c.id %>"
+           class="<%= typeof activeCategory !== 'undefined' && activeCategory && activeCategory.id === c.id ? 'active' : '' %>"><%= c.name %></a>
+      <% }) %>
+      <a href="/about" class="nav-right">About Us</a>
+    </div>
+  </nav>
+</header>
+
+<main class="container page">
+  <% if (flash) { %>
+    <div class="alert alert-<%= flash.type %>"><%= flash.text %></div>
+  <% } %>

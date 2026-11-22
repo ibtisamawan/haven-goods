@@ -1,0 +1,37 @@
+<%- include('_top') %>
+
+<div class="breadcrumb"><a href="/admin/customers">Customers</a> / <%= customer.name %></div>
+
+<div class="admin-grid">
+  <section class="card">
+    <h3>Orders</h3>
+    <table class="table">
+      <thead><tr><th>Order</th><th>Date</th><th>Total</th><th>Payment</th><th>Status</th></tr></thead>
+      <tbody>
+        <% orders.forEach(o => { %>
+          <tr>
+            <td><a href="/admin/orders/<%= o.id %>">#<%= o.id %></a></td>
+            <td><%= String(o.created_at).slice(0, 16) %></td>
+            <td><%= money(o.total) %></td>
+            <td><%= o.payment_method %> &middot; <%= o.payment_status %></td>
+            <td><span class="badge status-<%= o.status.toLowerCase() %>"><%= o.status %></span></td>
+          </tr>
+        <% }) %>
+        <% if (!orders.length) { %><tr><td colspan="5" class="muted">No orders yet.</td></tr><% } %>
+      </tbody>
+    </table>
+  </section>
+  <aside class="card">
+    <h3>Customer details</h3>
+    <dl class="details">
+      <dt>Name</dt><dd><%= customer.name %></dd>
+      <dt>Email</dt><dd><%= customer.email %></dd>
+      <dt>Phone</dt><dd><%= customer.phone || '—' %></dd>
+      <dt>Address</dt><dd><%= customer.address || '—' %></dd>
+      <dt>City</dt><dd><%= customer.city || '—' %></dd>
+      <dt>Joined</dt><dd><%= customer.created_at %></dd>
+    </dl>
+  </aside>
+</div>
+
+<%- include('_bottom') %>

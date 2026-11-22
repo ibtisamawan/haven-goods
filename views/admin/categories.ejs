@@ -1,0 +1,41 @@
+<%- include('_top') %>
+
+<div class="admin-grid">
+  <section class="card">
+    <table class="table">
+      <thead><tr><th>Name</th><th>Description</th><th>Products</th><th class="right">Actions</th></tr></thead>
+      <tbody>
+        <% categories.forEach(c => { %>
+          <tr>
+            <td><strong><%= c.name %></strong></td>
+            <td><%= c.description %></td>
+            <td><a href="/products?category=<%= c.id %>" target="_blank"><%= c.product_count %></a></td>
+            <td class="right nowrap">
+              <a href="/admin/categories?edit=<%= c.id %>" class="btn btn-sm btn-outline">Edit</a>
+              <form action="/admin/categories/<%= c.id %>/delete" method="post" class="inline" data-confirm="Delete category &quot;<%= c.name %>&quot;?">
+                <button class="btn btn-sm btn-danger">Delete</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </section>
+
+  <form action="/admin/categories" method="post" class="card">
+    <h3><%= editing ? 'Edit category' : 'Add new category' %></h3>
+    <% if (editing) { %><input type="hidden" name="id" value="<%= editing.id %>"><% } %>
+    <div class="field">
+      <label for="name">Name</label>
+      <input id="name" name="name" value="<%= editing ? editing.name : '' %>" required>
+    </div>
+    <div class="field">
+      <label for="description">Description</label>
+      <textarea id="description" name="description" rows="3"><%= editing ? editing.description : '' %></textarea>
+    </div>
+    <button class="btn btn-block"><%= editing ? 'Save category' : 'Add category' %></button>
+    <% if (editing) { %><a href="/admin/categories" class="btn btn-ghost btn-block">Cancel</a><% } %>
+  </form>
+</div>
+
+<%- include('_bottom') %>

@@ -1,0 +1,28 @@
+<%- include('_top') %>
+
+<p class="muted"><%= reviews.length %> most recent reviews. Delete reviews that are spam or inappropriate.</p>
+
+<section class="card">
+  <table class="table">
+    <thead><tr><th></th><th>Product</th><th>Rating</th><th>Review</th><th>By</th><th>Date</th><th class="right"></th></tr></thead>
+    <tbody>
+      <% reviews.forEach(r => { %>
+        <tr>
+          <td><img class="thumb" src="<%= r.image %>" alt=""></td>
+          <td><a href="/products/<%= r.product_id %>#reviews" target="_blank"><%= r.product_name %></a></td>
+          <td class="nowrap"><span class="stars" style="--r: <%= r.rating %>"></span></td>
+          <td><%= r.comment || '—' %></td>
+          <td><%= r.reviewer_name %><%= r.user_id ? '' : '' %></td>
+          <td class="nowrap"><%= String(r.created_at).slice(0, 10) %></td>
+          <td class="right">
+            <form action="/admin/reviews/<%= r.id %>/delete" method="post" data-confirm="Delete this review?">
+              <button class="btn btn-sm btn-danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</section>
+
+<%- include('_bottom') %>

@@ -1,0 +1,113 @@
+<%- include('partials/header') %>
+
+<% const slides = [
+  { p: banners.phone,  tone: 'slide-teal',   kicker: 'Mega Mobile Week', title: 'Latest smartphones at the best prices', text: 'Original phones with official warranty. Free delivery and cash on delivery.' },
+  { p: banners.laptop, tone: 'slide-navy',   kicker: 'Work & Study',     title: 'Laptops for every budget',               text: 'Apple, Dell, Lenovo and more. Save up to 15% this week.' },
+  { p: banners.shoes,  tone: 'slide-coral',  kicker: 'Step Up Your Style', title: 'Sneakers & shoes for everyone',        text: 'Nike, Puma and more. New arrivals every week.' },
+  { p: banners.book,   tone: 'slide-amber',  kicker: 'Book Fair',        title: 'Bestselling books, delivered',           text: 'Self-help, finance, fiction and programming books.' },
+].filter(s => s.p); %>
+
+<section class="home-hero">
+  <aside class="hero-cats">
+    <% categories.forEach(c => { %>
+      <a href="/products?category=<%= c.id %>"><img src="<%= c.image %>" alt=""><span><%= c.name %></span><i>›</i></a>
+    <% }) %>
+  </aside>
+
+  <div class="carousel" id="carousel">
+    <% slides.forEach((s, i) => { %>
+      <a class="slide <%= s.tone %><%= i === 0 ? ' active' : '' %>" href="/products/<%= s.p.id %>">
+        <div class="slide-text">
+          <span class="slide-kicker"><%= s.kicker %></span>
+          <h2><%= s.title %></h2>
+          <p><%= s.text %></p>
+          <span class="slide-price">
+            <%= s.p.name %> &middot; <b><%= money(s.p.price) %></b>
+            <% if (discount(s.p)) { %><s><%= money(s.p.old_price) %></s><% } %>
+          </span>
+          <span class="slide-cta">Shop now</span>
+        </div>
+        <img src="<%= s.p.image %>" alt="<%= s.p.name %>">
+      </a>
+    <% }) %>
+    <button class="car-btn prev" type="button" aria-label="Previous slide">‹</button>
+    <button class="car-btn next" type="button" aria-label="Next slide">›</button>
+    <div class="car-dots"><% slides.forEach((s, i) => { %><button type="button" class="<%= i === 0 ? 'active' : '' %>" aria-label="Slide <%= i + 1 %>"></button><% }) %></div>
+  </div>
+
+  <aside class="hero-side">
+    <div class="welcome-card">
+      <% if (user) { %>
+        <p>Welcome back,</p>
+        <strong><%= user.name %></strong>
+        <a href="/account" class="btn btn-block btn-sm">My orders</a>
+        <a href="/wishlist" class="btn btn-outline btn-block btn-sm">My wishlist</a>
+      <% } else { %>
+        <p>Welcome to</p>
+        <strong><%= store.name %></strong>
+        <a href="/login" class="btn btn-block btn-sm">Login</a>
+        <a href="/register" class="btn btn-outline btn-block btn-sm">Create account</a>
+      <% } %>
+    </div>
+    <div class="promo-card promo-1"><b>Free Delivery</b><span>on orders over <%= money(store.freeShippingOver) %></span></div>
+    <div class="promo-card promo-2"><b>Cash on Delivery</b><span>pay at your doorstep</span></div>
+  </aside>
+</section>
+
+<% if (flashSale.length) { %>
+<section class="block">
+  <div class="block-head">
+    <h2>Flash Sale</h2>
+    <div class="countdown" id="countdown" aria-label="Sale ends in">
+      <span>Ending in</span><b data-h>00</b>:<b data-m>00</b>:<b data-s>00</b>
+    </div>
+    <a href="/products?sort=popular" class="btn btn-outline btn-sm head-link">Shop all products</a>
+  </div>
+  <div class="grid grid-6">
+    <% flashSale.forEach(p => { %><%- include('partials/product-card', { p }) %><% }) %>
+  </div>
+</section>
+<% } %>
+
+<section class="block">
+  <div class="block-head"><h2>Categories</h2></div>
+  <div class="cat-grid">
+    <% categories.forEach(c => { %>
+      <a class="cat-tile" href="/products?category=<%= c.id %>">
+        <img src="<%= c.image %>" alt="" loading="lazy">
+        <span><%= c.name %></span>
+        <small><%= c.product_count %> items</small>
+      </a>
+    <% }) %>
+  </div>
+</section>
+
+<section class="block">
+  <div class="block-head"><h2>Top Picks for You</h2><a href="/products" class="head-link">View all ›</a></div>
+  <div class="grid grid-6">
+    <% featured.forEach(p => { %><%- include('partials/product-card', { p }) %><% }) %>
+  </div>
+</section>
+
+<section class="block">
+  <div class="block-head"><h2>Top Brands</h2></div>
+  <div class="brand-grid">
+    <% brands.forEach(b => { %>
+      <a class="brand-tile" href="/products?brand=<%= encodeURIComponent(b.brand) %>">
+        <img src="<%= b.image %>" alt="" loading="lazy">
+        <span><%= b.brand %></span>
+        <small><%= b.n %> product<%= b.n === 1 ? '' : 's' %></small>
+      </a>
+    <% }) %>
+  </div>
+</section>
+
+<section class="block plain">
+  <div class="block-head center-head"><h2>Just For You</h2></div>
+  <div class="grid grid-6">
+    <% forYou.forEach(p => { %><%- include('partials/product-card', { p }) %><% }) %>
+  </div>
+  <div class="center load-more"><a href="/products" class="btn btn-outline btn-lg">Load more products</a></div>
+</section>
+
+<%- include('partials/footer') %>

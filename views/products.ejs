@@ -1,0 +1,118 @@
+<%- include('partials/header') %>
+
+<div class="breadcrumb">
+  <a href="/">Home</a> ›
+  <% if (activeCategory) { %><a href="/products">All Products</a> › <%= activeCategory.name %>
+  <% } else if (q) { %>Search results<% } else { %>All Products<% } %>
+</div>
+
+<div class="shop-layout">
+  <aside class="filters">
+    <form method="get" action="/products" id="filter-form">
+      <% if (activeCategory) { %><input type="hidden" name="category" value="<%= activeCategory.id %>"><% } %>
+      <% if (q) { %><input type="hidden" name="q" value="<%= q %>"><% } %>
+      <% if (sort) { %><input type="hidden" name="sort" value="<%= sort %>"><% } %>
+      <% if (rating) { %><input type="hidden" name="rating" value="<%= rating %>"><% } %>
+
+      <div class="filter-group">
+        <h4>Category</h4>
+        <a href="<%= link({ category: null, brand: null, page: null }) %>" class="<%= !activeCategory ? 'active' : '' %>">All categories</a>
+        <% categories.forEach(c => { %>
+          <a href="<%= link({ category: c.id, brand: null, page: null }) %>" class="<%= activeCategory && activeCategory.id === c.id ? 'active' : '' %>">
+            <%= c.name %> <span class="muted">(<%= c.n %>)</span>
+          </a>
+        <% }) %>
+      </div>
+
+      <% if (brands.length) { %>
+      <div class="filter-group">
+        <h4><%= activeCategory && activeCategory.name === 'Books' ? 'Author' : 'Brand' %></h4>
+        <% brands.forEach(b => { %>
+          <label class="check">
+            <input type="checkbox" name="brand" value="<%= b.brand %>" data-autosubmit <%= selectedBrands.includes(b.brand) ? 'checked' : '' %>>
+            <%= b.brand %> <span class="muted">(<%= b.n %>)</span>
+          </label>
+        <% }) %>
+      </div>
+      <% } %>
+
+      <div class="filter-group">
+        <h4>Price (<%= store.currency %>)</h4>
+        <div class="price-range">
+          <input type="number" name="min" placeholder="Min" min="0" value="<%= min || '' %>" aria-label="Minimum price">
+          <span>–</span>
+          <input type="number" name="max" placeholder="Max" min="0" value="<%= max || '' %>" aria-label="Maximum price">
+          <button class="btn btn-sm">Go</button>
+        </div>
+      </div>
+    </form>
+
+    <div class="filter-group">
+      <h4>Rating</h4>
+      <% [5, 4, 3].forEach(r => { %>
+        <a href="<%= link({ rating: String(rating) === String(r) ? null : r, page: null }) %>" class="rating-link <%= String(rating) === String(r) ? 'active' : '' %>">
+          <span class="stars" style="--r: <%= r %>"></span> <%= r < 5 ? '& up' : '' %>
+        </a>
+      <% }) %>
+    </div>
+
+    <% if (selectedBrands.length || min || max || rating) { %>
+      <a href="<%= link({ brand: null, min: null, max: null, rating: null, page: null }) %>" class="btn btn-ghost btn-block">Clear filters</a>
+    <% } %>
+  </aside>
+
+  <section class="results">
+    <div class="results-head">
+      <div>
+        <h1><%= activeCategory ? activeCategory.name : (q ? `"${q}"` : 'All Products') %></h1>
+        <p class="muted"><%= total %> item<%= total === 1 ? '' : 's' %> found<%= q && activeCategory ? ` for "${q}"` : '' %></p>
+      </div>
+      <form method="get" action="/products" class="sort-form">
+        <% for (const [k, v] of Object.entries({ category: activeCategory && activeCategory.id, q, min, max, rating })) { if (v) { %>
+          <input type="hidden" name="<%= k %>" value="<%= v %>">
+        <% } } %>
+        <% selectedBrands.forEach(b => { %><input type="hidden" name="brand" value="<%= b %>"><% }) %>
+        <label for="sort">Sort by:</label>
+        <select name="sort" id="sort" data-autosubmit>
+          <option value="">Best match</option>
+          <option value="popular" <%= sort === 'popular' ? 'selected' : '' %>>Best selling</option>
+          <option value="newest" <%= sort === 'newest' ? 'selected' : '' %>>Newest</option>
+          <option value="rating" <%= sort === 'rating' ? 'selected' : '' %>>Top rated</option>
+          <option value="price_asc" <%= sort === 'price_asc' ? 'selected' : '' %>>Price: low to high</option>
+          <option value="price_desc" <%= sort === 'price_desc' ? 'selected' : '' %>>Price: high to low</option>
+        </select>
+      </form>
+    </div>
+
+    <% if (selectedBrands.length) { %>
+      <div class="chips">
+        <% selectedBrands.forEach(b => { %>
+          <a class="chip" href="<%= link({ brand: selectedBrands.filter(x => x !== b), page: null }) %>"><%= b %> ✕</a>
+        <% }) %>
+      </div>
+    <% } %>
+
+    <% if (products.length) { %>
+      <div class="grid grid-4">
+        <% products.forEach(p => { %><%- include('partials/product-card', { p }) %><% }) %>
+      </div>
+      <% if (pages > 1) { %>
+        <nav class="pagination" aria-label="Pages">
+          <% if (page > 1) { %><a href="<%= link({ page: page - 1 }) %>">‹ Prev</a><% } %>
+          <% for (let i = 1; i <= pages; i++) { %>
+            <a href="<%= link({ page: i }) %>" class="<%= i === page ? 'active' : '' %>"><%= i %></a>
+          <% } %>
+          <% if (page < pages) { %><a href="<%= link({ page: page + 1 }) %>">Next ›</a><% } %>
+        </nav>
+      <% } %>
+    <% } else { %>
+      <div class="empty">
+        <h3>No products found</h3>
+        <p>Try different keywords or remove some filters.</p>
+        <a class="btn" href="/products">View all products</a>
+      </div>
+    <% } %>
+  </section>
+</div>
+
+<%- include('partials/footer') %>

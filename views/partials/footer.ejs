@@ -1,0 +1,53 @@
+</main>
+
+<section class="trust-strip">
+  <div class="container">
+    <div><b>100% Original</b><span>Genuine products from trusted brands</span></div>
+    <div><b>Cash on Delivery</b><span>Pay when your order arrives</span></div>
+    <div><b>Free Delivery</b><span>On orders over <%= money(store.freeShippingOver) %></span></div>
+    <div><b>7-Day Returns</b><span>Easy returns &amp; refunds</span></div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div>
+      <div class="brand brand-footer">
+        <img src="/images/logo.svg" alt="" width="36" height="36">
+        <strong><%= store.name %></strong>
+      </div>
+      <p>From our shop on Main Bazaar to your doorstep. Thousands of happy customers across Pakistan shop with us for original products, fair prices and fast delivery.</p>
+      <p class="contact-line"><%= store.phone %> &middot; <%= store.email %></p>
+    </div>
+    <div>
+      <h4>Customer Care</h4>
+      <ul>
+        <li><a href="/help">Help Center</a></li>
+        <li><a href="/help#how-to-buy">How to Buy</a></li>
+        <li><a href="/help#returns">Returns &amp; Refunds</a></li>
+        <li><a href="/account">Track Your Order</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Categories</h4>
+      <ul>
+        <% navCategories.forEach(c => { %><li><a href="/products?category=<%= c.id %>"><%= c.name %></a></li><% }) %>
+      </ul>
+    </div>
+    <div>
+      <h4><%= store.name %></h4>
+      <ul>
+        <li><a href="/about">About Us</a></li>
+        <li><a href="/register">Create Account</a></li>
+        <li><a href="/wishlist">My Wishlist</a></li>
+        <li><a href="/cart">Shopping Cart</a></li>
+      </ul>
+      <h4 class="mt">Payment Methods</h4>
+      <div class="pay-badges"><span>Cash on Delivery</span><span>VISA</span><span>Mastercard</span><span>Mobile Wallet</span></div>
+    </div>
+  </div>
+  <div class="container copyright">&copy; <%= new Date().getFullYear() %> <%= store.name %>. All rights reserved.</div>
+</footer>
+<script src="/js/main.js"></script>
+</body>
+</html>
