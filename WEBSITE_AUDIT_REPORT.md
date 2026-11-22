@@ -224,8 +224,10 @@ The project has no compile/bundle step (server-rendered EJS, no front-end build)
 | Serverless compatibility | ✅ no `app.listen` on Vercel; database and uploads in `/tmp`; sessions in cookies; `trust proxy` for https cookies |
 | Security / cache headers on CDN files | ✅ added in `vercel.json` |
 | Asset paths | ✅ all 173 checked by `npm run check`; CSS/JS needed by the function are included |
-| `vercel build` locally | ⚠️ **Not verified.** Vercel CLI 66.6.0 fails on this Windows PC with `spawn cmd.exe ENOENT` before running the build command. It fails the same way with `cmd.exe` explicitly on PATH, so the bug is in the CLI, not the project. The build command itself (`npm run check`) passes locally |
-| Deployed? | ❌ **No.** As requested, nothing was pushed or deployed. The live site still runs the pre-audit code |
+| `vercel build` locally | ⚠️ Vercel CLI 66.6.0 fails on this Windows PC with `spawn cmd.exe ENOENT` (a CLI bug, not a project problem) – replaced by a real Vercel build, next row |
+| **Build on Vercel** | ✅ **Verified.** With your permission the branch was pushed and Vercel built a **Preview** deployment (`haven-goods-28fn8bo6d-…vercel.app`, commit `315bbc0`). Build log: Node.js 24.x, `npm run check` → "All checks passed", build completed in 4 s, status **Ready** |
+| Preview tested in a browser? | ⚠️ **Not yet.** Previews are behind Vercel Deployment Protection (only the account owner can open them), and the Chrome browser available to me is signed in to a different Vercel account |
+| Production deployed? | ❌ **No.** `main` and the live site still run the pre-audit code (`851c4f8`) |
 
 **Recommended way to verify:** push the branch `audit/production-hardening` to GitHub. Vercel then builds a **Preview** deployment on its own URL, which does not affect the live site. Run `BASE_URL=<preview-url> npm run audit:browser` against it, then merge to `main` to go live. This needs your permission.
 
@@ -237,4 +239,5 @@ The project has no compile/bundle step (server-rendered EJS, no front-end build)
 | X2 | No "forgot password" email | Medium | Needs an email-sending service | An email provider account (e.g. Resend, SendGrid) and its API key in Vercel |
 | X3 | Rate limits are counted per server instance, so a determined attacker hitting many instances gets more attempts | Low | Needs shared storage | A shared store such as Upstash Redis |
 | X4 | Card and mobile-wallet payments are demonstrations | Low (by design for the assignment) | Requires a merchant account | A payment gateway account and keys |
-| — | Real Vercel build of the new code | — | Needs permission to create a preview deployment | Your OK to push the branch |
+| — | Browser test of the preview deployment | — | The preview is protected and only opens for the `ibtisamawan` Vercel account | Open the preview while logged in as `ibtisamawan`, or allow previews to be public temporarily |
+| — | **Unintended setting:** running `vercel curl` against the protected preview automatically added a "Protection Bypass for Automation" secret to the Vercel project. The value was never shown, and the live site is not affected | Low | The CLI does this without asking first | Remove it: Vercel dashboard → haven-goods → Settings → Deployment Protection → Protection Bypass for Automation → revoke |
