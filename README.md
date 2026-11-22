@@ -3,6 +3,7 @@
 A full online store for a local business, built like a real marketplace: 62 real products in 8 categories, product photo galleries, discounts, flash sale, ratings & reviews, wishlist, live search, filters, shopping cart, checkout with **Cash on Delivery** and **demo online payments**, order tracking, and an **admin dashboard** to manage products, categories, customers, orders and reviews.
 
 **Live website:** <https://haven-goods.vercel.app> (hosted on Vercel – see [DEPLOY_GUIDE.md](DEPLOY_GUIDE.md))
+**Source code:** <https://github.com/ibtisamawan/haven-goods> (every push to `main` deploys automatically)
 
 **Tech stack:** Node.js (22.13+ or 24), Express, EJS templates, SQLite (built into Node – no separate database server), HTML, CSS, JavaScript. Deployed on Vercel.
 

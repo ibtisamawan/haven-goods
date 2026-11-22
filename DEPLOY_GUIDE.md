@@ -78,9 +78,42 @@ That's it: the site is live at **https://haven-goods.vercel.app**.
 - A customer is redirected away from `/admin`; unknown pages show the 404 page.
 - A real browser loads the home page with no broken images and no JavaScript errors.
 
-## 4. Updating the live site later
+## 4. Source code on GitHub + automatic deploys
 
-After changing the code, run the deploy command again:
+**GitHub repository:** <https://github.com/ibtisamawan/haven-goods>
+
+**Step 6 – Put the code on GitHub**
+
+```
+git init -b main
+git add -A
+git commit -m "Haven Goods e-commerce website"
+winget install --id GitHub.cli -e          # install the GitHub command-line tool
+gh auth login --web                         # approve the one-time code at github.com/login/device
+gh repo create haven-goods --public --source . --remote origin --push
+```
+
+The `.gitignore` file keeps `node_modules`, the local database and secret files (`.env*`, `.vercel`) out of GitHub.
+
+**Step 7 – Connect GitHub to Vercel**
+
+```
+vercel git connect https://github.com/ibtisamawan/haven-goods.git --yes
+```
+
+Output: `> Connected`
+
+## 5. Updating the live site later
+
+Now every push to GitHub deploys automatically. Pushes to the `main` branch go straight to <https://haven-goods.vercel.app>:
+
+```
+git add -A
+git commit -m "Describe your change"
+git push
+```
+
+Open the project in the Vercel dashboard to watch the deployment. It takes about 20 seconds. You can still deploy by hand from your computer at any time:
 
 ```
 vercel deploy --prod --yes
@@ -97,7 +130,7 @@ Useful extras:
 
 You can also manage everything in the Vercel dashboard: <https://vercel.com/dashboard>.
 
-## 5. Demo accounts on the live site
+## 6. Demo accounts on the live site
 
 | Role | Email | Password |
 |---|---|---|
