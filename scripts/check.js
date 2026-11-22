@@ -53,7 +53,30 @@ const missing = [...refs].filter((p) => !fs.existsSync(path.join(ROOT, 'public',
 missing.forEach((p) => fail(`missing asset ${p}`));
 ok(`${refs.size} asset references checked`);
 
-// 5. The app module loads (catches broken requires) without starting a server
+// 5. CSS: the same selector must not have two separate stand-alone rules outside
+//    @media. That usually means two features reuse one class name by accident
+//    (e.g. ".check" for filter checkboxes and for the order-success tick).
+{
+  const css = fs.readFileSync(path.join(ROOT, 'public', 'css', 'style.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  const alone = new Map();
+  let depth = 0; let buf = ''; let line = 1;
+  for (const ch of css) {
+    if (ch === '\n') line++;
+    if (ch === '{') {
+      const sel = buf.trim();
+      if (depth === 0 && sel && !sel.startsWith('@') && !sel.includes(',')) {
+        if (!alone.has(sel)) alone.set(sel, []);
+        alone.get(sel).push(line);
+      }
+      depth++; buf = '';
+    } else if (ch === '}') { depth--; buf = ''; } else if (depth === 0) buf += ch;
+  }
+  const dupes = [...alone].filter(([, lines]) => lines.length > 1);
+  dupes.forEach(([sel, lines]) => fail(`style.css defines "${sel}" in separate rules (lines ${lines.join(', ')}) – possible class name clash`));
+  if (!dupes.length) ok(`style.css: ${alone.size} selectors, no class name clashes`);
+}
+
+// 6. The app module loads (catches broken requires) without starting a server
 try {
   require(path.join(ROOT, 'server.js'));
   ok('server.js and all routes load');

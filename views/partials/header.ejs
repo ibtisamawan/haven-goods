@@ -70,7 +70,7 @@
       </a>
     </div>
   </div>
-  <nav class="cat-nav">
+  <nav class="cat-nav" aria-label="Main">
     <div class="container">
       <div class="cat-menu">
         <button type="button" class="cat-menu-btn" aria-expanded="false" aria-controls="cat-dropdown">☰ Categories</button>
@@ -78,13 +78,16 @@
           <% navCategories.forEach(c => { %><a href="/products?category=<%= c.id %>"><%= c.name %></a><% }) %>
         </div>
       </div>
-      <a href="/products?sort=popular">Best Sellers</a>
-      <a href="/products?sort=newest">New Arrivals</a>
-      <% navCategories.slice(0, 5).forEach(c => { %>
-        <a href="/products?category=<%= c.id %>"
-           class="<%= typeof activeCategory !== 'undefined' && activeCategory && activeCategory.id === c.id ? 'active' : '' %>"><%= c.name %></a>
-      <% }) %>
-      <a href="/about" class="nav-right">About Us</a>
+      <%# Only the links scroll sideways on small screens; the Categories menu stays outside so its dropdown is not cut off %>
+      <div class="cat-links">
+        <% const sortNow = typeof sort !== 'undefined' ? sort : ''; const catNow = typeof activeCategory !== 'undefined' && activeCategory ? activeCategory.id : null; %>
+        <a href="/products?sort=popular" class="<%= path === '/products' && sortNow === 'popular' && !catNow ? 'active' : '' %>">Best Sellers</a>
+        <a href="/products?sort=newest" class="<%= path === '/products' && sortNow === 'newest' && !catNow ? 'active' : '' %>">New Arrivals</a>
+        <% navCategories.slice(0, 5).forEach(c => { %>
+          <a href="/products?category=<%= c.id %>" class="<%= catNow === c.id ? 'active' : '' %>"<%- catNow === c.id ? ' aria-current="page"' : '' %>><%= c.name %></a>
+        <% }) %>
+        <a href="/about" class="nav-right<%= path === '/about' ? ' active' : '' %>">About Us</a>
+      </div>
     </div>
   </nav>
 </header>

@@ -8,8 +8,8 @@
 | **Audited code** | `main` @ `851c4f8` (currently live) |
 | **Fixes on branch** | `audit/production-hardening` (local, **not pushed and not deployed** – see section 13) |
 
-**Summary.** The whole project was inspected file by file and tested in a real browser at 7 screen sizes, plus an end-to-end shopping test and a 35-check security test. **60 issues** were found: **0 Critical, 6 High, 24 Medium, 30 Low**.
-- **56 were fixed** (all 6 High, 22 Medium, 28 Low). 55 of these are verified; 1 (smaller Vercel bundle, P6) can only be confirmed by a Vercel build.
+**Summary.** The whole project was inspected file by file and tested in a real browser at 7 screen sizes, plus an end-to-end shopping test and a 35-check security test. **65 issues** were found: **0 Critical, 7 High, 26 Medium, 32 Low**. This includes 5 layout bugs (R6–R10) found after the owner tested the preview on a phone.
+- **61 were fixed** (all 7 High, 24 Medium, 30 Low). 60 of these are verified; 1 (smaller Vercel bundle, P6) can only be confirmed by a Vercel build.
 - **4 remain**, because they need an external service or account: a hosted database, an email service, a shared rate-limit store and a payment gateway. They are documented in section 13.
 
 Every automated check now passes. The only step that could not be verified is a real Vercel build: Vercel's command-line tool has a bug on this Windows computer, so a preview deployment is needed (with your permission).
@@ -135,6 +135,11 @@ Severity scale: **Critical** – data loss or full compromise · **High** – se
 | R3 | On phones the filter column pushed products far below the screen | Medium | Sidebar stacked above results | Filters become a collapsible "Filters" panel on small screens (closed unless a filter is active, with a count badge) | ✅ 320 px screenshot |
 | R4 | Top utility links wrapped onto two lines at 320 px | Low | Too many links for the width | Help link hidden on small phones (still in the footer), no wrapping | ✅ CSS + browser audit |
 | R5 | Images without width/height (layout shift while loading) | Low | Missing attributes | Width/height on product, gallery, category, brand, cart and order images | ✅ code review |
+| R6 | **Brand filter rendered as overlapping 52px green circles** with unreadable names, on phones *and* desktop (also on the current live site). *Found by the site owner testing the preview on a phone* | High | **Class name clash**: `.check` was used for the filter checkbox rows and for the ✓ circle on the order-success page; the later rule overrode the first | Success icon renamed `.success-check`. New `npm run check` step fails the build when a selector has two separate stand-alone rules, and it flags this exact clash in the old stylesheet | ✅ brand rows now 26 px tall (were ~104 px) at 360 px and 1366 px; screenshots; check catches the clash |
+| R7 | Grey line under the category bar on phones | Low | It was the bar's horizontal scrollbar, which Android always shows | Scrollbar hidden (still swipeable); a fade on the right edge hints that more links follow | ✅ scrollbar height 0 px; screenshot |
+| R8 | On phones the **Categories dropdown was cut off** | Medium | The dropdown was inside the sideways-scrolling bar, and scroll containers clip their content | Only the links scroll now (`.cat-links`); the Categories menu sits outside the scrolling area | ✅ dropdown fully visible (335 px), not clipped |
+| R9 | On phones the **Categories menu could not be closed** by tapping it again | Medium | The menu also opened on `:hover`, and touch screens keep the hover state after a tap | Hover-to-open only on devices with a mouse (`@media (hover: hover) and (pointer: fine)`) | ✅ tested: tap opens, tap again closes, tap outside closes; desktop hover still works |
+| R10 | Category bar underline did not mark "Best Sellers", "New Arrivals" or "About Us" when on those pages | Low | Active state only checked categories | Active state + `aria-current` for all bar links | ✅ checked: Best Sellers, New Arrivals, About Us and Clothing each underlined on their own page |
 
 Result: **no horizontal scrolling, overlapping, broken image or console error on any of the 30 pages at 320, 375, 414, 768, 1024, 1366 or 1440 px.**
 
@@ -201,7 +206,7 @@ See 4.3 and 4.4. All pages now have one `<h1>`, a page title and a meta descript
 | Check | Result |
 |---|---|
 | `npm run lint` (ESLint) | ✅ 0 errors, 0 warnings (baseline: 1 error) |
-| `npm run check` (build check) | ✅ 27 templates, 31 renders, database loads (62 products, 225 reviews…), no FK errors, 173 assets |
+| `npm run check` (build check) | ✅ 27 templates, 31 renders, database loads (62 products, 225 reviews…), no FK errors, 173 assets, no CSS class clashes (new) |
 | `npm audit` (production and dev) | ✅ 0 vulnerabilities (baseline: 9 high in dev tools) |
 | `npm run audit:browser` – 210 page views | ✅ 0 issues (baseline: 34 issues) |
 | `npm test` – end-to-end shopping + admin flow | ✅ all steps pass, 26 screenshots |
