@@ -29,13 +29,48 @@ const css = `
   img { max-width: 100%; max-height: 225mm; display: block; margin: 8px auto 14px; border: 1px solid #d8d5ce; break-inside: avoid; }
   code { background: #f2f0ea; padding: 1px 4px; border-radius: 3px; font-size: 9.5pt; }
   p:has(img) { break-inside: avoid; }
+
+  .cover { height: 258mm; box-sizing: border-box; border: 3px solid #000; padding: 16mm 15mm;
+    font-family: "Times New Roman", Times, serif; color: #000; break-after: page; }
+  .cover img { border: 0; width: 125mm; margin: 0 auto; }
+  .cover hr { border: 0; border-top: 1.5px solid #000; margin: 6mm 0 12mm; }
+  .cover h1 { font-family: "Times New Roman", Times, serif; color: #000; border: 0; text-align: center;
+    font-size: 24pt; margin: 0 0 2mm; letter-spacing: .5px; }
+  .cover .sub { text-align: center; font-size: 13pt; margin: 0 0 12mm; }
+  .cover table { border: 0; font-size: 12.5pt; margin: 0; break-inside: auto; }
+  .cover td, .cover th { border: 0; padding: 0 0 7mm; background: none; }
+  .cover td:first-child { font-weight: bold; width: 48%; }
+  .cover .members td { padding-bottom: 2.5mm; }
+  .cover .members td:first-child { font-weight: normal; width: 62%; }
 `;
+
+// Title page, only for the project report
+const COVER = `
+<section class="cover">
+  <img src="docs/university-logo.png" alt="Abbottabad University of Science &amp; Technology">
+  <hr>
+  <h1>E-Commerce Assignment</h1>
+  <p class="sub">Haven Goods – Online Shopping Website (Group Assignment)</p>
+  <table>
+    <tr><td>Group Members:</td><td>
+      <table class="members">
+        <tr><td>Ibtisam Awan</td><td>15477</td></tr>
+        <tr><td>Allyan Khan</td><td>15472</td></tr>
+        <tr><td>Afnan Khan</td><td>15511</td></tr>
+      </table></td></tr>
+    <tr><td>Department:</td><td>Software Engineering</td></tr>
+    <tr><td>Class:</td><td>BSSE 6th Semester</td></tr>
+    <tr><td>Subject:</td><td>E-Commerce</td></tr>
+    <tr><td>Instructor:</td><td>Ma'am Maria Jadoon</td></tr>
+    <tr><td>Submission Date:</td><td>26<sup>th</sup> November, 2026</td></tr>
+  </table>
+</section>`;
 
 (async () => {
   const md = fs.readFileSync(path.join(ROOT, INPUT), 'utf8');
   const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
     <base href="${pathToFileURL(ROOT + path.sep).href}"><style>${css}</style></head>
-    <body>${marked.parse(md)}</body></html>`;
+    <body>${INPUT === 'REPORT.md' ? COVER : ''}${marked.parse(md)}</body></html>`;
   const tmp = path.join(ROOT, 'report.tmp.html');
   fs.writeFileSync(tmp, html);
 
